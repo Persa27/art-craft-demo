@@ -505,10 +505,27 @@ footer strong { color: var(--ink); }
 <script>
 (function () {
   var video = document.getElementById('film');
+  // 配信先が Range リクエストに対応しないため、動画全体を取得してシークできるようにする
+  var ready = fetch(video.currentSrc || video.src).then(function (r) {
+    if (!r.ok) throw new Error('video');
+    return r.blob();
+  }).then(function (blob) {
+    var t = video.currentTime, playing = !video.paused;
+    video.src = URL.createObjectURL(blob);
+    return new Promise(function (done) {
+      video.addEventListener('loadedmetadata', function () {
+        video.currentTime = t;
+        if (playing) video.play().catch(function () {});
+        done();
+      }, { once: true });
+    });
+  }).catch(function () {});
   document.querySelectorAll('.jump button').forEach(function (b) {
     b.addEventListener('click', function () {
-      video.currentTime = parseFloat(b.dataset.t) - 0.6;
-      var p = video.play(); if (p && p.catch) p.catch(function () {});
+      ready.then(function () {
+        video.currentTime = parseFloat(b.dataset.t) - 0.6;
+        var p = video.play(); if (p && p.catch) p.catch(function () {});
+      });
     });
   });
   var chips = document.querySelectorAll('.chip');
