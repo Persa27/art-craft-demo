@@ -142,7 +142,8 @@ td.num { font-variant-numeric: tabular-nums; }
 .sheet figcaption { margin: 0 0 6px; }
 .sheet-scroll { overflow: auto; max-height: 430px; background: #fff; color: #11222f; border: 1px solid var(--rule); }
 .sheet-scroll table { font-size: 14px; width: auto; min-width: 100%; }
-.sheet-scroll td { border: 1px solid #d4dde1; padding: 4px 8px; white-space: nowrap; vertical-align: middle; }
+.sheet-scroll td { border: 1px solid #d4dde1; padding: 4px 8px; white-space: nowrap; vertical-align: top; }
+.sheet-scroll tr + tr td { white-space: normal; min-width: 7em; max-width: 18em; }
 
 /* 認証履歴画面 */
 .window { margin-top: 22px; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: var(--surface); }

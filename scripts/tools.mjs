@@ -34,11 +34,11 @@ export const tools = [
     key: 'grid', name: 'GridCraft', kind: '表計算', stage: 'design', cat: 'data', version: '0.17.0', cmds: 385,
     near: 'Excel',
     what: 'シート、セルの値、数式、書式をコマンドで作り、xlsx、CSV、HTML、PDF に変換します。設計書やテスト仕様書のような管理表の生成に向きます。',
-    made: 'アプリの設計書とテスト仕様書を 1 冊にしたブック。機能一覧、認証履歴画面の項目定義、テスト仕様書の 3 シートで、消化率は COUNTIF の数式で集計しています。H で始まる項目の結果は、公開ページの認証履歴画面で実際に確認したものです。実機が必要な項目は未実施です。',
+    made: 'アプリの設計書と結合試験仕様書を 1 冊にしたブック。結合試験仕様書は、一般公開されているテスト仕様書テンプレートの書式(概要シートと、大項目・中項目・小項目、テスト観点、前提条件などの 12 列のテストケース一覧)に合わせました。実施状況は別シートを参照する COUNTIF の数式で集計し、実施結果の列には入力規則のリストを設定しています。IT-10〜IT-17 の結果は、公開ページの認証履歴画面で実際に確認したものです。実機が必要な項目は未実施です。',
     formats: '入出力: xlsx / csv / tsv / json / html / pdf',
     wide: true,
-    media: [{ type: 'sheets', items: [['spec-tests', 'テスト仕様書'], ['spec-items', '画面項目定義'], ['spec-functions', '機能一覧']] }],
-    note: 'GridCraft の PDF は日本語フォントを埋め込まず、PdfCraft の render では文字が空白でした。ここでは HTML に変換して掲載し、PDF は WordCraft で作っています。',
+    media: [{ type: 'sheets', items: [['spec-tests', '結合試験仕様書'], ['spec-summary', '結合試験_概要'], ['spec-items', '画面項目定義'], ['spec-functions', '機能一覧']] }],
+    note: 'GridCraft の PDF は日本語フォントを埋め込まず、PdfCraft の render では文字が空白でした。ここでは HTML に変換して掲載し、PDF は WordCraft で作っています(テストケース一覧は A4 横向き)。',
     warn: true,
   },
   {
@@ -129,9 +129,9 @@ export const tools = [
     key: 'pdf', name: 'PdfCraft', kind: 'PDF 編集', stage: 'doc', cat: 'document', version: '0.19.0', cmds: 195, cmdsLabel: 'ツール',
     near: 'Acrobat',
     what: 'PDF の結合、抽出、分割、文書情報の編集、テキスト抽出、偽の墨消しの検査などを行います。',
-    made: '仕様書、図面、テスト仕様書、チラシを 1 冊に結合した 5 ページの PDF。文書情報を書き込み、墨消しの検査も実行しました。',
+    made: '仕様書、図面、結合試験仕様書(概要 1 ページ、テストケース一覧 2 ページ)、チラシを 1 冊に結合した 6 ページの PDF。文書情報を書き込み、墨消しの検査も実行しました。',
     formats: '読み書き: pdf　ページの書き出し: png / jpg / tif',
-    media: [{ type: 'gallery', tall: true, items: [1, 2, 3, 4, 5].map((n) => [`pdf-page-${n}.png`, `${n} ページ目`]) }],
+    media: [{ type: 'gallery', tall: true, items: [1, 2, 3, 4, 5, 6].map((n) => [`pdf-page-${n}.png`, `${n} ページ目`]) }],
   },
 ];
 

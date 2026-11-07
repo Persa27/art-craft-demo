@@ -39,7 +39,9 @@ function media(m, t) {
   if (m.type === 'video') return `<figure class="clip"><video controls playsinline preload="metadata" poster="${a(m.poster)}" src="${a(m.src)}" aria-label="${esc(m.label)}"></video><figcaption>${esc(m.label)} / <a href="${a(m.src)}">動画ファイルを直接開く</a></figcaption></figure>`;
   if (m.type === 'sheets') return m.items.map(([f, c]) => {
     const html = fs.readFileSync(path.join(BUILD, 'grid', f + '.html'), 'utf8');
-    const table = html.slice(html.indexOf('<table>'), html.indexOf('</table>') + 8).replace(/<tr>(<td style="text-align:left;"><\/td>)+<\/tr>/g, '');
+    const table = html.slice(html.indexOf('<table>'), html.indexOf('</table>') + 8).replace(/<tr>(<td style="text-align:left;"><\/td>)+<\/tr>/g, '')
+      // タイトルだけの 1 行目は全列にまたがるセルにして、A 列の幅を押し広げないようにする
+      .replace(/^<table><tr>(<td[^>]*>[^<]+<\/td>)((?:<td style="text-align:left;"><\/td>)+)<\/tr>/, (m, first, rest) => `<table><tr>${first.replace('<td', `<td colspan="${rest.split('<td').length}"`)}</tr>`);
     return `<figure class="sheet"><figcaption>シート「${esc(c)}」(gridcraft-cli の HTML 出力)</figcaption><div class="sheet-scroll" tabindex="0">${table}</div></figure>`;
   }).join('');
   if (m.type === 'audio') return `<div class="sounds">${m.items.map(([f, c, d]) => `<div class="sound"><strong>${esc(c)}</strong><span>${esc(d)}</span><audio controls preload="none" src="${a(f)}"></audio></div>`).join('')}</div>`;
