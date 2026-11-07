@@ -23,5 +23,5 @@ node scripts/build-all.mjs
 ## デプロイ
 
 ```bash
-npx wrangler pages deploy site --project-name art-craft-demo --branch main
+npx wrangler deploy
 ```
