@@ -1,0 +1,310 @@
+<title>ArtCraft CLI 実演帳</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* 路線図を背骨にした誌面。13 ツールを 1 本の路線の駅として並べ、コマンドだけ端末風にする */
+:root {
+  --paper: #f5f8f8; --surface: #ffffff; --ink: #11222f; --muted: #52646f; --rule: #d3dee2;
+  --plan: #7a3e9d; --design: #0d7ba3; --asset: #2c8558; --video: #c5620f; --doc: #bf3158;
+  --term: #10202c; --term-ink: #dcebf0; --term-dim: #93adb9;
+  --warn-bg: #fdf1e3; --warn-ink: #84460a; --note-bg: #e9f1f4;
+  --font: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --mono: "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0e1a22; --surface: #15242e; --ink: #e8f0f3; --muted: #a2b5bf; --rule: #2b3e4a;
+  --plan: #c594e0; --design: #5fc0e4; --asset: #6fcf9c; --video: #f0a25c; --doc: #f28aa6;
+  --term: #081219; --term-ink: #dcebf0; --term-dim: #8aa4b0;
+  --warn-bg: #3a2a16; --warn-ink: #f6cf9f; --note-bg: #1c2f3a; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --paper: #0e1a22; --surface: #15242e; --ink: #e8f0f3; --muted: #a2b5bf; --rule: #2b3e4a;
+  --plan: #c594e0; --design: #5fc0e4; --asset: #6fcf9c; --video: #f0a25c; --doc: #f28aa6;
+  --term: #081219; --term-ink: #dcebf0; --term-dim: #8aa4b0;
+  --warn-bg: #3a2a16; --warn-ink: #f6cf9f; --note-bg: #1c2f3a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.8; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3, h4 { line-height: 1.3; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--design); outline-offset: 2px; }
+.stage-plan { --c: var(--plan); } .stage-design { --c: var(--design); } .stage-asset { --c: var(--asset); } .stage-video { --c: var(--video); } .stage-doc { --c: var(--doc); }
+
+/* 冒頭 */
+.hero { padding-block: 44px 40px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 44px; align-items: center; }
+.kicker { font-weight: 700; color: var(--muted); letter-spacing: .06em; font-size: 14px; }
+h1 { font-size: clamp(34px, 5vw, 54px); font-weight: 900; margin-top: 10px; letter-spacing: .01em; }
+.lead { margin-top: 18px; font-size: 17px; max-width: 34em; }
+.facts { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 8px 26px; font-size: 14px; color: var(--muted); }
+.facts b { display: block; font-size: 26px; line-height: 1.2; color: var(--ink); font-weight: 900; font-variant-numeric: tabular-nums; }
+.ceiling { height: 12px; background: var(--rule); border-radius: 2px; }
+.rods { display: flex; justify-content: space-around; padding-inline: 18%; }
+.rods i { width: 6px; height: 30px; background: var(--muted); }
+.bezel { background: #0a141b; padding: 10px 10px 8px; border-radius: 6px; position: relative; }
+.bezel video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #0b1f33; }
+.cam { display: flex; align-items: center; justify-content: center; gap: 6px; height: 16px; color: #8fa6b2; font-size: 10px; letter-spacing: .12em; }
+.cam i { width: 8px; height: 8px; border-radius: 50%; background: #27b7d6; }
+.jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; font-size: 14px; color: var(--muted); }
+.jump button { font: inherit; font-weight: 700; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+.jump button:hover { border-color: var(--ink); }
+
+/* 路線図 */
+.map { background: var(--surface); border-block: 1px solid var(--rule); padding-block: 26px 22px; }
+.map-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; }
+.map-head h2 { font-size: 20px; font-weight: 900; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: inherit; font-size: 14px; font-weight: 500; color: var(--ink); background: transparent; border: 1px solid var(--rule); border-radius: 999px; padding: 3px 13px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); font-weight: 700; }
+.line-scroll { overflow-x: auto; margin-top: 18px; padding-bottom: 6px; }
+.line { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(13, minmax(74px, 1fr)); min-width: 962px; }
+.line li { position: relative; transition: opacity .15s; }
+.line li::before { content: ""; position: absolute; top: 15px; left: 0; right: 0; height: 6px; background: var(--c); }
+.line li:first-child::before { left: 50%; } .line li:last-child::before { right: 50%; }
+.line a { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; text-decoration: none; gap: 3px; padding-inline: 2px; }
+.dot { width: 36px; height: 36px; border-radius: 50%; background: var(--surface); border: 5px solid var(--c); display: grid; place-items: center; font-weight: 900; font-size: 14px; font-variant-numeric: tabular-nums; }
+.line a:hover .dot { background: var(--c); color: var(--surface); }
+.rname { font-weight: 700; font-size: 15px; line-height: 1.3; margin-top: 2px; }
+.rkind { font-size: 11px; line-height: 1.35; color: var(--muted); }
+.line li.off { opacity: .28; }
+.legend { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 10px 0 0; padding: 0; font-size: 13px; color: var(--muted); }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.legend i { width: 18px; height: 6px; background: var(--c); }
+
+/* 案件 */
+section.block { padding-block: 52px 8px; }
+.block > .wrap > h2, h2.big { font-size: clamp(25px, 3.4vw, 34px); font-weight: 900; }
+.intro { margin-top: 12px; max-width: 42em; }
+.brief { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; margin-top: 24px; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+thead th { font-size: 13px; color: var(--muted); font-weight: 500; }
+tbody th { font-weight: 700; white-space: nowrap; }
+td.num { font-variant-numeric: tabular-nums; }
+.table-scroll { overflow-x: auto; }
+.same { margin-top: 34px; }
+.same h3 { font-size: 21px; font-weight: 900; }
+.same-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 14px; }
+.same figure { margin: 0; }
+.frame { position: relative; line-height: 0; }
+.frame::after { content: ""; position: absolute; top: 0; bottom: 0; left: {{GUIDE}}%; border-left: 2px dashed #ffd24a; }
+.same figcaption, .pair figcaption, .gallery figcaption, .row figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+
+/* ツール */
+.tool { padding-block: 34px 38px; border-top: 1px solid var(--rule); scroll-margin-top: 10px; }
+.tool[hidden] { display: none; }
+.tool-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: center; }
+.stop { width: 58px; height: 58px; border-radius: 50%; border: 7px solid var(--c); display: grid; place-items: center; font-weight: 900; font-size: 19px; font-variant-numeric: tabular-nums; }
+.eyebrow { font-size: 13px; font-weight: 700; color: var(--c); letter-spacing: .04em; }
+.tool h3 { font-size: clamp(25px, 3.2vw, 32px); font-weight: 900; }
+.ver { font-family: var(--mono); font-size: 12px; line-height: 1.5; color: var(--muted); text-align: right; }
+.tool-body { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 34px; margin-top: 20px; align-items: start; }
+.tool h4 { font-size: 13px; font-weight: 700; color: var(--muted); margin-top: 16px; letter-spacing: .03em; }
+.tool-text h4:first-child { margin-top: 0; }
+.formats { font-size: 14px; }
+.note { margin-top: 16px; padding: 9px 12px; background: var(--note-bg); font-size: 14px; line-height: 1.7; }
+.note.warn { background: var(--warn-bg); color: var(--warn-ink); }
+.note strong { margin-right: 6px; }
+.tool-media { min-width: 0; display: grid; gap: 14px; }
+.shot { margin: 0; border: 1px solid var(--rule); background: #fff; }
+.shot.plain { border: 0; background: #fff; padding: 14px 18px; }
+.shot.plain img { max-width: 420px; width: 100%; }
+.shot.tall img { max-height: 560px; width: auto; margin-inline: auto; }
+.shot.crop { overflow: hidden; }
+.shot.crop img { width: 100%; clip-path: inset(5% 30% 40% 7%); margin-bottom: -38%; transform: scale(1.0); }
+.gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.gallery.tall { grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: end; }
+.gallery figure, .pair figure, .row figure { margin: 0; min-width: 0; }
+.gallery img { border: 1px solid var(--rule); background: #fff; }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.row { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: flex-end; padding: 14px 16px; background: #fff; border: 1px solid var(--rule); }
+.row.dark { background: #16303f; border-color: #16303f; }
+.row.dark figcaption { color: #cfe0e7; }
+.row img { height: 130px; width: auto; }
+.row figcaption { color: #52646f; }
+.sounds { display: grid; gap: 12px; }
+.sound { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--rule); }
+.sound span { font-size: 14px; color: var(--muted); }
+.sound audio { width: 100%; margin-top: 6px; }
+.cmds { margin-top: 22px; display: grid; gap: 10px; }
+.cmds h4 { margin-top: 0; }
+.cmd { background: var(--term); color: var(--term-ink); min-width: 0; border-radius: 4px; }
+.cmd-head { display: flex; flex-wrap: wrap; gap: 2px 12px; align-items: center; padding: 8px 12px 0; font-size: 13px; }
+.cmd-head > span:first-child { font-weight: 700; }
+.cmd-meta { color: var(--term-dim); font-size: 12px; margin-right: auto; }
+.copy { font: inherit; font-size: 12px; color: var(--term-ink); background: transparent; border: 1px solid var(--term-dim); border-radius: 3px; padding: 0 8px; cursor: pointer; }
+.copy:hover { border-color: var(--term-ink); }
+.cmd pre { margin: 0; padding: 6px 12px 11px; overflow-x: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.6; }
+.cmd code { white-space: pre-wrap; overflow-wrap: anywhere; font-family: inherit; }
+
+/* 共通 */
+.common { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px 32px; margin-top: 22px; }
+.common h3 { font-size: 17px; font-weight: 900; }
+.common p { font-size: 15px; margin-top: 4px; }
+.common code, .intro code { font-family: var(--mono); font-size: .9em; }
+footer { margin-top: 60px; background: var(--surface); border-top: 1px solid var(--rule); padding-block: 30px 36px; font-size: 14px; color: var(--muted); }
+footer p + p { margin-top: 8px; }
+footer strong { color: var(--ink); }
+
+@media (max-width: 860px) {
+  .hero, .brief, .tool-body { grid-template-columns: minmax(0, 1fr); }
+  .hero { gap: 26px; padding-block: 28px 30px; }
+  .common { grid-template-columns: minmax(0, 1fr); }
+  .gallery.tall { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .same-grid { grid-template-columns: minmax(0, 1fr); }
+  .tool-head { grid-template-columns: auto minmax(0, 1fr); }
+  .ver { grid-column: 1 / -1; text-align: left; }
+  .row img { height: 96px; }
+}
+</style>
+
+<div class="wrap hero">
+  <div>
+    <p class="kicker">架空の駅の改札案件で試す</p>
+    <h1>ArtCraft CLI 実演帳</h1>
+    <p class="lead">ArtCraft 系の 13 個の CLI は、画面を開かずにコマンドだけで動く制作ツールです。ここでは顔認証改札の案件を 1 件想定し、提案資料から完成動画までを CLI だけで作りました。</p>
+    <p class="facts"><span><b>13</b>ツール</span><span><b>{{NCMD}}</b>掲載したコマンド</span><span><b>約 {{TOTAL}} 秒</b>それらの実行時間の合計</span></p>
+  </div>
+  <div>
+    <div class="ceiling"></div>
+    <div class="rods"><i></i><i></i></div>
+    <div class="bezel">
+      <video id="film" controls playsinline preload="metadata" poster="assets/film-frame-ok.png" src="assets/film-tooru-display.mp4" aria-label="ディスプレイの完成動画"></video>
+      <div class="cam"><i></i>CAMERA</div>
+    </div>
+    <p class="jump"><span>場面へ移動</span>
+      <button type="button" data-t="{{T_OK}}">認証 OK {{T_OK}} 秒</button>
+      <button type="button" data-t="{{T_NG}}">認証 NG {{T_NG}} 秒</button>
+      <button type="button" data-t="11">未判定 11 秒</button>
+    </p>
+  </div>
+</div>
+
+<nav class="map" aria-label="ツールの路線図">
+  <div class="wrap">
+    <div class="map-head">
+      <h2>案件の流れに沿った 13 駅</h2>
+      <div class="chips" role="group" aria-label="用途で絞り込む">{{CHIPS}}</div>
+    </div>
+    <div class="line-scroll" tabindex="0"><ol class="line">{{ROUTE}}</ol></div>
+    <ul class="legend">{{LEGEND}}</ul>
+  </div>
+</nav>
+
+<section class="block" id="brief">
+  <div class="wrap">
+    <h2>題材の案件</h2>
+    <p class="intro">改札の天井にディスプレイを吊り下げ、そこに付けたカメラの映像を別室のエッジ端末が解析する想定です。駅名、数値、試験データはすべて架空です。顔認証は実行しておらず、人物の位置と判定結果を時系列データとして用意したシミュレーションです。</p>
+    <div class="brief">
+      <div class="table-scroll"><table>
+        <caption hidden>架空の仕様</caption>
+        <tbody>
+          <tr><th scope="row">舞台</th><td>あさなぎ線 ひかり台駅(架空)</td></tr>
+          <tr><th scope="row">天井高</th><td class="num">3.0 m</td></tr>
+          <tr><th scope="row">ディスプレイ下端</th><td class="num">床から 2.2 m</td></tr>
+          <tr><th scope="row">解像度</th><td class="num">カメラ、ディスプレイともに 1920×1080</td></tr>
+          <tr><th scope="row">顔認証の有効距離</th><td class="num">カメラから 2.0〜4.0 m</td></tr>
+        </tbody>
+      </table></div>
+      <div class="table-scroll"><table>
+        <caption hidden>デモのシナリオ</caption>
+        <thead><tr><th scope="col">人物</th><th scope="col">動き</th><th scope="col">表示</th><th scope="col">効果音</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">A</th><td>有効距離に入る</td><td>緑の人型 + チェック印</td><td>OK 音</td></tr>
+          <tr><th scope="row">B</th><td>有効距離に入る</td><td>赤の人型 + バツ印</td><td>NG 音</td></tr>
+          <tr><th scope="row">C</th><td>有効距離の外を通過</td><td>灰色の人型</td><td>なし</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="same">
+      <h3>カメラと画面で、人型の位置が一致する</h3>
+      <p class="intro">カメラとディスプレイの解像度が同じなので、カメラ映像の座標をそのまま表示に使えます。破線は、人物 A の横位置 x = {{X}} px です。距離は {{D}} m の時点です。通行者と向き合うと左右が逆に見えるため、鏡のように見せたい場合は x 座標を反転します。</p>
+      <div class="same-grid">
+        <figure><div class="frame"><img src="assets/photo-camera-frame.png" alt="カメラ映像風の画像。人物 A が破線の位置にいる" loading="lazy"></div><figcaption>カメラ映像(PhotoCraft で再現)</figcaption></figure>
+        <figure><div class="frame"><img src="assets/film-frame-ok.png" alt="ディスプレイの表示。緑の人型が同じ破線の位置にいる" loading="lazy"></div><figcaption>ディスプレイの表示(FilmCraft の出力)</figcaption></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="tools" style="padding-bottom:0">
+  <div class="wrap">
+    <h2 class="big">13 ツールの実演</h2>
+    <p class="intro" style="margin-bottom:26px">画像、音声、動画はすべて CLI の実出力です。掲載したコマンドは、終了コード 0 で成功したものだけです。作業フォルダは <code>build/</code> で、長いコマンドは途中を省略して表示しています。コピーすると全文を取得できます。</p>
+    <div id="tool-list">
+{{TOOLS}}
+    </div>
+  </div>
+</section>
+
+<section class="block" id="common">
+  <div class="wrap">
+    <h2>どのツールにも共通する使い方</h2>
+    <div class="common">
+      <div><h3>拡張子で形式が決まる</h3><p>出力ファイルの拡張子を変えるだけで、書き出す形式を切り替えられます。</p></div>
+      <div><h3>コマンドは調べてから使う</h3><p><code>commands</code> で一覧を、<code>describe</code> で引数を確認できます。ツールによって名前が少し異なります。</p></div>
+      <div><h3>順番に実行して保存する</h3><p><code>run</code> は複数のコマンドを順に実行し、最後に保存や書き出しを行います。</p></div>
+      <div><h3>AI エージェントから使う</h3><p>多くのツールは <code>mcp</code> で MCP サーバーとして起動できます。</p></div>
+      <div><h3>上書きは止まる</h3><p>入力と同じファイルへの保存は原則拒否され、<code>--in-place</code> で許可します。</p></div>
+      <div><h3>PowerShell の引用符に注意</h3><p>JSON はシングルクォートで囲むか、スクリプトファイルに分けると安全です。</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="lessons">
+  <div class="wrap">
+    <h2>実行してわかった注意点</h2>
+    <p class="intro">各バージョンで今回確認した挙動です。</p>
+    <div class="table-scroll" style="margin-top:14px"><table>
+      <thead><tr><th scope="col">ツール</th><th scope="col">起きたこと</th><th scope="col">対処</th></tr></thead>
+      <tbody>{{LESSONS}}</tbody>
+    </table></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><strong>このページは非公式の紹介ページです。</strong>ArtCraft の開発元が作成、監修したものではありません。</p>
+    <p>駅名、路線名、TOORU、仕様の数値、試験データはすべて架空です。実在の駅、事業者、製品とは関係ありません。文中の他社製品名は各社の商標で、機能の位置づけを説明する目的でのみ記載しています。</p>
+    <p>参考: <a href="https://getartcraft.com" rel="noopener">getartcraft.com</a> / <a href="https://discord.gg/artcraft" rel="noopener">Discord コミュニティ</a></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var video = document.getElementById('film');
+  document.querySelectorAll('.jump button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      video.currentTime = parseFloat(b.dataset.t) - 0.6;
+      var p = video.play(); if (p && p.catch) p.catch(function () {});
+    });
+  });
+  var chips = document.querySelectorAll('.chip');
+  chips.forEach(function (c) {
+    c.addEventListener('click', function () {
+      var f = c.dataset.filter;
+      chips.forEach(function (o) { o.setAttribute('aria-pressed', String(o === c)); });
+      document.querySelectorAll('.tool').forEach(function (s) { s.hidden = !(f === 'all' || s.dataset.cat === f); });
+      document.querySelectorAll('.line li').forEach(function (l) { l.classList.toggle('off', !(f === 'all' || l.dataset.cat === f)); });
+    });
+  });
+  document.querySelectorAll('.copy').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var done = function () { b.textContent = 'コピーしました'; setTimeout(function () { b.textContent = 'コピー'; }, 1500); };
+      var fallback = function () {
+        var r = document.createRange(); r.selectNodeContents(b.closest('.cmd').querySelector('code'));
+        var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = '選択しました';
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(b.dataset.copy).then(done, fallback); else fallback();
+    });
+  });
+})();
+</script>

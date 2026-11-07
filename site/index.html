@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ArtCraft CLI 実演帳</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* 路線図を背骨にした誌面。13 ツールを 1 本の路線の駅として並べ、コマンドだけ端末風にする */
+:root {
+  --paper: #f5f8f8; --surface: #ffffff; --ink: #11222f; --muted: #52646f; --rule: #d3dee2;
+  --plan: #7a3e9d; --design: #0d7ba3; --asset: #2c8558; --video: #c5620f; --doc: #bf3158;
+  --term: #10202c; --term-ink: #dcebf0; --term-dim: #93adb9;
+  --warn-bg: #fdf1e3; --warn-ink: #84460a; --note-bg: #e9f1f4;
+  --font: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --mono: "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0e1a22; --surface: #15242e; --ink: #e8f0f3; --muted: #a2b5bf; --rule: #2b3e4a;
+  --plan: #c594e0; --design: #5fc0e4; --asset: #6fcf9c; --video: #f0a25c; --doc: #f28aa6;
+  --term: #081219; --term-ink: #dcebf0; --term-dim: #8aa4b0;
+  --warn-bg: #3a2a16; --warn-ink: #f6cf9f; --note-bg: #1c2f3a; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --paper: #0e1a22; --surface: #15242e; --ink: #e8f0f3; --muted: #a2b5bf; --rule: #2b3e4a;
+  --plan: #c594e0; --design: #5fc0e4; --asset: #6fcf9c; --video: #f0a25c; --doc: #f28aa6;
+  --term: #081219; --term-ink: #dcebf0; --term-dim: #8aa4b0;
+  --warn-bg: #3a2a16; --warn-ink: #f6cf9f; --note-bg: #1c2f3a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.8; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3, h4 { line-height: 1.3; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--design); outline-offset: 2px; }
+.stage-plan { --c: var(--plan); } .stage-design { --c: var(--design); } .stage-asset { --c: var(--asset); } .stage-video { --c: var(--video); } .stage-doc { --c: var(--doc); }
+
+/* 冒頭 */
+.hero { padding-block: 44px 40px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 44px; align-items: center; }
+.kicker { font-weight: 700; color: var(--muted); letter-spacing: .06em; font-size: 14px; }
+h1 { font-size: clamp(34px, 5vw, 54px); font-weight: 900; margin-top: 10px; letter-spacing: .01em; }
+.lead { margin-top: 18px; font-size: 17px; max-width: 34em; }
+.facts { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 8px 26px; font-size: 14px; color: var(--muted); }
+.facts b { display: block; font-size: 26px; line-height: 1.2; color: var(--ink); font-weight: 900; font-variant-numeric: tabular-nums; }
+.ceiling { height: 12px; background: var(--rule); border-radius: 2px; }
+.rods { display: flex; justify-content: space-around; padding-inline: 18%; }
+.rods i { width: 6px; height: 30px; background: var(--muted); }
+.bezel { background: #0a141b; padding: 10px 10px 8px; border-radius: 6px; position: relative; }
+.bezel video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #0b1f33; }
+.cam { display: flex; align-items: center; justify-content: center; gap: 6px; height: 16px; color: #8fa6b2; font-size: 10px; letter-spacing: .12em; }
+.cam i { width: 8px; height: 8px; border-radius: 50%; background: #27b7d6; }
+.jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; font-size: 14px; color: var(--muted); }
+.jump button { font: inherit; font-weight: 700; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+.jump button:hover { border-color: var(--ink); }
+
+/* 路線図 */
+.map { background: var(--surface); border-block: 1px solid var(--rule); padding-block: 26px 22px; }
+.map-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; }
+.map-head h2 { font-size: 20px; font-weight: 900; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: inherit; font-size: 14px; font-weight: 500; color: var(--ink); background: transparent; border: 1px solid var(--rule); border-radius: 999px; padding: 3px 13px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); font-weight: 700; }
+.line-scroll { overflow-x: auto; margin-top: 18px; padding-bottom: 6px; }
+.line { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(13, minmax(74px, 1fr)); min-width: 962px; }
+.line li { position: relative; transition: opacity .15s; }
+.line li::before { content: ""; position: absolute; top: 15px; left: 0; right: 0; height: 6px; background: var(--c); }
+.line li:first-child::before { left: 50%; } .line li:last-child::before { right: 50%; }
+.line a { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; text-decoration: none; gap: 3px; padding-inline: 2px; }
+.dot { width: 36px; height: 36px; border-radius: 50%; background: var(--surface); border: 5px solid var(--c); display: grid; place-items: center; font-weight: 900; font-size: 14px; font-variant-numeric: tabular-nums; }
+.line a:hover .dot { background: var(--c); color: var(--surface); }
+.rname { font-weight: 700; font-size: 15px; line-height: 1.3; margin-top: 2px; }
+.rkind { font-size: 11px; line-height: 1.35; color: var(--muted); }
+.line li.off { opacity: .28; }
+.legend { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 10px 0 0; padding: 0; font-size: 13px; color: var(--muted); }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.legend i { width: 18px; height: 6px; background: var(--c); }
+
+/* 案件 */
+section.block { padding-block: 52px 8px; }
+.block > .wrap > h2, h2.big { font-size: clamp(25px, 3.4vw, 34px); font-weight: 900; }
+.intro { margin-top: 12px; max-width: 42em; }
+.brief { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; margin-top: 24px; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+thead th { font-size: 13px; color: var(--muted); font-weight: 500; }
+tbody th { font-weight: 700; white-space: nowrap; }
+td.num { font-variant-numeric: tabular-nums; }
+.table-scroll { overflow-x: auto; }
+.same { margin-top: 34px; }
+.same h3 { font-size: 21px; font-weight: 900; }
+.same-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 14px; }
+.same figure { margin: 0; }
+.frame { position: relative; line-height: 0; }
+.frame::after { content: ""; position: absolute; top: 0; bottom: 0; left: 39.24%; border-left: 2px dashed #ffd24a; }
+.same figcaption, .pair figcaption, .gallery figcaption, .row figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+
+/* ツール */
+.tool { padding-block: 34px 38px; border-top: 1px solid var(--rule); scroll-margin-top: 10px; }
+.tool[hidden] { display: none; }
+.tool-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: center; }
+.stop { width: 58px; height: 58px; border-radius: 50%; border: 7px solid var(--c); display: grid; place-items: center; font-weight: 900; font-size: 19px; font-variant-numeric: tabular-nums; }
+.eyebrow { font-size: 13px; font-weight: 700; color: var(--c); letter-spacing: .04em; }
+.tool h3 { font-size: clamp(25px, 3.2vw, 32px); font-weight: 900; }
+.ver { font-family: var(--mono); font-size: 12px; line-height: 1.5; color: var(--muted); text-align: right; }
+.tool-body { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 34px; margin-top: 20px; align-items: start; }
+.tool h4 { font-size: 13px; font-weight: 700; color: var(--muted); margin-top: 16px; letter-spacing: .03em; }
+.tool-text h4:first-child { margin-top: 0; }
+.formats { font-size: 14px; }
+.note { margin-top: 16px; padding: 9px 12px; background: var(--note-bg); font-size: 14px; line-height: 1.7; }
+.note.warn { background: var(--warn-bg); color: var(--warn-ink); }
+.note strong { margin-right: 6px; }
+.tool-media { min-width: 0; display: grid; gap: 14px; }
+.shot { margin: 0; border: 1px solid var(--rule); background: #fff; }
+.shot.plain { border: 0; background: #fff; padding: 14px 18px; }
+.shot.plain img { max-width: 420px; width: 100%; }
+.shot.tall img { max-height: 560px; width: auto; margin-inline: auto; }
+.shot.crop { overflow: hidden; }
+.shot.crop img { width: 100%; clip-path: inset(5% 30% 40% 7%); margin-bottom: -38%; transform: scale(1.0); }
+.gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.gallery.tall { grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: end; }
+.gallery figure, .pair figure, .row figure { margin: 0; min-width: 0; }
+.gallery img { border: 1px solid var(--rule); background: #fff; }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.row { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: flex-end; padding: 14px 16px; background: #fff; border: 1px solid var(--rule); }
+.row.dark { background: #16303f; border-color: #16303f; }
+.row.dark figcaption { color: #cfe0e7; }
+.row img { height: 130px; width: auto; }
+.row figcaption { color: #52646f; }
+.sounds { display: grid; gap: 12px; }
+.sound { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--rule); }
+.sound span { font-size: 14px; color: var(--muted); }
+.sound audio { width: 100%; margin-top: 6px; }
+.cmds { margin-top: 22px; display: grid; gap: 10px; }
+.cmds h4 { margin-top: 0; }
+.cmd { background: var(--term); color: var(--term-ink); min-width: 0; border-radius: 4px; }
+.cmd-head { display: flex; flex-wrap: wrap; gap: 2px 12px; align-items: center; padding: 8px 12px 0; font-size: 13px; }
+.cmd-head > span:first-child { font-weight: 700; }
+.cmd-meta { color: var(--term-dim); font-size: 12px; margin-right: auto; }
+.copy { font: inherit; font-size: 12px; color: var(--term-ink); background: transparent; border: 1px solid var(--term-dim); border-radius: 3px; padding: 0 8px; cursor: pointer; }
+.copy:hover { border-color: var(--term-ink); }
+.cmd pre { margin: 0; padding: 6px 12px 11px; overflow-x: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.6; }
+.cmd code { white-space: pre-wrap; overflow-wrap: anywhere; font-family: inherit; }
+
+/* 共通 */
+.common { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px 32px; margin-top: 22px; }
+.common h3 { font-size: 17px; font-weight: 900; }
+.common p { font-size: 15px; margin-top: 4px; }
+.common code, .intro code { font-family: var(--mono); font-size: .9em; }
+footer { margin-top: 60px; background: var(--surface); border-top: 1px solid var(--rule); padding-block: 30px 36px; font-size: 14px; color: var(--muted); }
+footer p + p { margin-top: 8px; }
+footer strong { color: var(--ink); }
+
+@media (max-width: 860px) {
+  .hero, .brief, .tool-body { grid-template-columns: minmax(0, 1fr); }
+  .hero { gap: 26px; padding-block: 28px 30px; }
+  .common { grid-template-columns: minmax(0, 1fr); }
+  .gallery.tall { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .same-grid { grid-template-columns: minmax(0, 1fr); }
+  .tool-head { grid-template-columns: auto minmax(0, 1fr); }
+  .ver { grid-column: 1 / -1; text-align: left; }
+  .row img { height: 96px; }
+}
+</style>
+
+<div class="wrap hero">
+  <div>
+    <p class="kicker">架空の駅の改札案件で試す</p>
+    <h1>ArtCraft CLI 実演帳</h1>
+    <p class="lead">ArtCraft 系の 13 個の CLI は、画面を開かずにコマンドだけで動く制作ツールです。ここでは顔認証改札の案件を 1 件想定し、提案資料から完成動画までを CLI だけで作りました。</p>
+    <p class="facts"><span><b>13</b>ツール</span><span><b>43</b>掲載したコマンド</span><span><b>約 20 秒</b>それらの実行時間の合計</span></p>
+  </div>
+  <div>
+    <div class="ceiling"></div>
+    <div class="rods"><i></i><i></i></div>
+    <div class="bezel">
+      <video id="film" controls playsinline preload="metadata" poster="assets/film-frame-ok.png" src="assets/film-tooru-display.mp4" aria-label="ディスプレイの完成動画"></video>
+      <div class="cam"><i></i>CAMERA</div>
+    </div>
+    <p class="jump"><span>場面へ移動</span>
+      <button type="button" data-t="3.2">認証 OK 3.2 秒</button>
+      <button type="button" data-t="7.7">認証 NG 7.7 秒</button>
+      <button type="button" data-t="11">未判定 11 秒</button>
+    </p>
+  </div>
+</div>
+
+<nav class="map" aria-label="ツールの路線図">
+  <div class="wrap">
+    <div class="map-head">
+      <h2>案件の流れに沿った 13 駅</h2>
+      <div class="chips" role="group" aria-label="用途で絞り込む"><button type="button" class="chip" data-filter="all" aria-pressed="true">すべて</button><button type="button" class="chip" data-filter="image" aria-pressed="false">画像</button><button type="button" class="chip" data-filter="av" aria-pressed="false">映像・音声</button><button type="button" class="chip" data-filter="document" aria-pressed="false">文書</button><button type="button" class="chip" data-filter="data" aria-pressed="false">図面・データ</button><button type="button" class="chip" data-filter="ui" aria-pressed="false">UI</button></div>
+    </div>
+    <div class="line-scroll" tabindex="0"><ol class="line"><li class="stage-plan" data-cat="document"><a href="#deck"><span class="dot" aria-hidden="true">1</span><span class="rname">Deck</span><span class="rkind">プレゼンテーション</span></a></li><li class="stage-design" data-cat="data"><a href="#cad"><span class="dot" aria-hidden="true">2</span><span class="rname">CAD</span><span class="rkind">2D CAD</span></a></li><li class="stage-design" data-cat="data"><a href="#grid"><span class="dot" aria-hidden="true">3</span><span class="rname">Grid</span><span class="rkind">表計算</span></a></li><li class="stage-design" data-cat="ui"><a href="#fig"><span class="dot" aria-hidden="true">4</span><span class="rname">Fig</span><span class="rkind">UI デザイン</span></a></li><li class="stage-asset" data-cat="image"><a href="#vector"><span class="dot" aria-hidden="true">5</span><span class="rname">Vector</span><span class="rkind">ベクター描画</span></a></li><li class="stage-asset" data-cat="image"><a href="#photo"><span class="dot" aria-hidden="true">6</span><span class="rname">Photo</span><span class="rkind">ラスター画像編集</span></a></li><li class="stage-asset" data-cat="image"><a href="#light"><span class="dot" aria-hidden="true">7</span><span class="rname">Light</span><span class="rkind">写真現像</span></a></li><li class="stage-asset" data-cat="av"><a href="#sound"><span class="dot" aria-hidden="true">8</span><span class="rname">Sound</span><span class="rkind">オーディオ編集</span></a></li><li class="stage-video" data-cat="av"><a href="#effect"><span class="dot" aria-hidden="true">9</span><span class="rname">Effect</span><span class="rkind">モーショングラフィックス</span></a></li><li class="stage-video" data-cat="av"><a href="#film"><span class="dot" aria-hidden="true">10</span><span class="rname">Film</span><span class="rkind">動画編集</span></a></li><li class="stage-doc" data-cat="document"><a href="#word"><span class="dot" aria-hidden="true">11</span><span class="rname">Word</span><span class="rkind">ワープロ</span></a></li><li class="stage-doc" data-cat="document"><a href="#design"><span class="dot" aria-hidden="true">12</span><span class="rname">Design</span><span class="rkind">DTP・ページレイアウト</span></a></li><li class="stage-doc" data-cat="document"><a href="#pdf"><span class="dot" aria-hidden="true">13</span><span class="rname">Pdf</span><span class="rkind">PDF 編集</span></a></li></ol></div>
+    <ul class="legend"><li class="stage-plan"><i></i>企画</li><li class="stage-design"><i></i>設計</li><li class="stage-asset"><i></i>素材</li><li class="stage-video"><i></i>映像</li><li class="stage-doc"><i></i>文書</li></ul>
+  </div>
+</nav>
+
+<section class="block" id="brief">
+  <div class="wrap">
+    <h2>題材の案件</h2>
+    <p class="intro">改札の天井にディスプレイを吊り下げ、そこに付けたカメラの映像を別室のエッジ端末が解析する想定です。駅名、数値、試験データはすべて架空です。顔認証は実行しておらず、人物の位置と判定結果を時系列データとして用意したシミュレーションです。</p>
+    <div class="brief">
+      <div class="table-scroll"><table>
+        <caption hidden>架空の仕様</caption>
+        <tbody>
+          <tr><th scope="row">舞台</th><td>あさなぎ線 ひかり台駅(架空)</td></tr>
+          <tr><th scope="row">天井高</th><td class="num">3.0 m</td></tr>
+          <tr><th scope="row">ディスプレイ下端</th><td class="num">床から 2.2 m</td></tr>
+          <tr><th scope="row">解像度</th><td class="num">カメラ、ディスプレイともに 1920×1080</td></tr>
+          <tr><th scope="row">顔認証の有効距離</th><td class="num">カメラから 2.0〜4.0 m</td></tr>
+        </tbody>
+      </table></div>
+      <div class="table-scroll"><table>
+        <caption hidden>デモのシナリオ</caption>
+        <thead><tr><th scope="col">人物</th><th scope="col">動き</th><th scope="col">表示</th><th scope="col">効果音</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">A</th><td>有効距離に入る</td><td>緑の人型 + チェック印</td><td>OK 音</td></tr>
+          <tr><th scope="row">B</th><td>有効距離に入る</td><td>赤の人型 + バツ印</td><td>NG 音</td></tr>
+          <tr><th scope="row">C</th><td>有効距離の外を通過</td><td>灰色の人型</td><td>なし</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="same">
+      <h3>カメラと画面で、人型の位置が一致する</h3>
+      <p class="intro">カメラとディスプレイの解像度が同じなので、カメラ映像の座標をそのまま表示に使えます。破線は、人物 A の横位置 x = 754 px です。距離は 2.82 m の時点です。通行者と向き合うと左右が逆に見えるため、鏡のように見せたい場合は x 座標を反転します。</p>
+      <div class="same-grid">
+        <figure><div class="frame"><img src="assets/photo-camera-frame.png" alt="カメラ映像風の画像。人物 A が破線の位置にいる" loading="lazy"></div><figcaption>カメラ映像(PhotoCraft で再現)</figcaption></figure>
+        <figure><div class="frame"><img src="assets/film-frame-ok.png" alt="ディスプレイの表示。緑の人型が同じ破線の位置にいる" loading="lazy"></div><figcaption>ディスプレイの表示(FilmCraft の出力)</figcaption></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="tools" style="padding-bottom:0">
+  <div class="wrap">
+    <h2 class="big">13 ツールの実演</h2>
+    <p class="intro" style="margin-bottom:26px">画像、音声、動画はすべて CLI の実出力です。掲載したコマンドは、終了コード 0 で成功したものだけです。作業フォルダは <code>build/</code> で、長いコマンドは途中を省略して表示しています。コピーすると全文を取得できます。</p>
+    <div id="tool-list">
+<section class="tool stage-plan" id="deck" data-cat="document">
+  <header class="tool-head">
+    <span class="stop" aria-hidden="true">01</span>
+    <div><p class="eyebrow">企画の工程 / プレゼンテーション</p><h3>DeckCraft</h3></div>
+    <p class="ver">v0.16.0<br>コマンド 331</p>
+  </header>
+  <div class="tool-body">
+    <div class="tool-text">
+      <h4>何ができるか</h4><p>スライドを作成し、PowerPoint 形式、PDF、画像に書き出します。図形、画像、テーマフォントもコマンドで指定できます。 PowerPoint に近い位置づけのツールです。</p>
+      <h4>この案件で作ったもの</h4><p>導入提案のスライド 4 枚。システム構成図は図形コマンドで描き、最後のスライドに PhotoCraft の画像を貼りました。</p>
+      <h4>対応形式</h4><p class="formats">読み: .deckcraft / .pptx　書き: .deckcraft / .pptx / .pdf / .md / .png / .jpg / .gif</p>
+      <p class="note"><strong>補足</strong> 座標は 960×540 pt です。日本語を揃えるには design.fonts でテーマフォントを指定します。</p>
+    </div>
+    <div class="tool-media"><div class="gallery"><figure><img src="assets/deck-slide-1.png" alt="スライド 1" loading="lazy"><figcaption>スライド 1</figcaption></figure><figure><img src="assets/deck-slide-2.png" alt="スライド 2" loading="lazy"><figcaption>スライド 2</figcaption></figure><figure><img src="assets/deck-slide-3.png" alt="スライド 3" loading="lazy"><figcaption>スライド 3</figcaption></figure><figure><img src="assets/deck-slide-4.png" alt="スライド 4" loading="lazy"><figcaption>スライド 4</figcaption></figure></div></div>
+  </div>
+  <div class="cmds"><h4>実際に実行したコマンド</h4><div class="cmd"><div class="cmd-head"><span>4 枚のスライドを作って保存する</span><span class="cmd-meta">終了コード 0 / 215 ms</span><button type="button" class="copy" data-copy="deckcraft-cli run --cmd 'design.fonts={&quot;major&quot;:&quot;Noto Sans JP&quot;,&quot;minor&quot;:&quot;Noto Sans JP&quot;}' --cmd 'slide.new={&quot;layout&quot;:&quot;title&quot;,&quot;title&quot;:&quot;TOORU 顔認証改札&quot;,&quot;body&quot;:&quot;あさなぎ線 ひかり台駅 実証実験のご提案(架空)&quot;}' --cmd 'slide.new={&quot;layout&quot;:&quot;titleAndContent&quot;,&quot;title&quot;:&quot;ねらい&quot;,&quot;body&quot;:&quot;立ち止まらず改札を通過できる体験を検証する\n天井のディスプレイで認証結果をその場で伝える\n顔画像は画面に出さず、人型のみで表示する&quot;}' --cmd 'slide.new={&quot;layout&quot;:&quot;titleOnly&quot;,&quot;title&quot;:&quot;システム構成&quot;}' --cmd 'shape.insert={&quot;preset&quot;:&quot;roundRect&quot;,&quot;rect&quot;:[50,200,200,110],&quot;text&quot;:&quot;カメラ\nディスプレイに設置&quot;}' --cmd 'shape.fill={&quot;color&quot;:&quot;#0E8FB0&quot;}' --cmd 'shape.insert={&quot;preset&quot;:&quot;roundRect&quot;,&quot;rect&quot;:[380,200,200,110],&quot;text&quot;:&quot;エッジ端末\n別室で顔認証&quot;}' --cmd 'shape.fill={&quot;color&quot;:&quot;#0F2A44&quot;}' --cmd 'shape.insert={&quot;preset&quot;:&quot;roundRect&quot;,&quot;rect&quot;:[710,200,200,110],&quot;text&quot;:&quot;ディスプレイ\n動画 + 人型 + 効果音&quot;}' --cmd 'shape.fill={&quot;color&quot;:&quot;#12A150&quot;}' --cmd 'shape.insert={&quot;preset&quot;:&quot;rightArrow&quot;,&quot;rect&quot;:[262,235,106,40]}' --cmd 'shape.fill={&quot;color&quot;:&quot;#8A94A6&quot;}' --cmd 'shape.insert={&quot;preset&quot;:&quot;rightArrow&quot;,&quot;rect&quot;:[592,235,106,40]}' --cmd 'shape.fill={&quot;color&quot;:&quot;#8A94A6&quot;}' --cmd 'slide.new={&quot;layout&quot;:&quot;titleOnly&quot;,&quot;title&quot;:&quot;カメラから 2〜4 m で認証&quot;}' --cmd 'insert.picture={&quot;path&quot;:&quot;D:/work/art-craft-test/build/photo/camera-frame.png&quot;,&quot;rect&quot;:[180,130,600,338]}' --save deck/proposal.deckcraft">コピー</button></div><pre tabindex="0"><code>deckcraft-cli run --cmd 'design.fonts={&quot;major&quot;:&quot;Noto Sans JP&quot;,&quot;minor&quot;:&quot;Noto Sans JP&quot;}' --cmd 'slide.new={&quot;layout&quot;:&quot;title&quot;,&quot;title&quot;:&quot;TOORU 顔認証改札&quot;,&quot;body&quot;:&quot;あさなぎ線 ひかり台駅 実証実験のご提案(架空)&quot;}' … ほか 14 個の --cmd … --save deck/proposal.deckcraft</code></pre></div><div class="cmd"><div class="cmd-head"><span>PowerPoint 形式に変換する</span><span class="cmd-meta">終了コード 0 / 229 ms</span><button type="button" class="copy" data-copy="deckcraft-cli convert deck/proposal.deckcraft deck/proposal.pptx">コピー</button></div><pre tabindex="0"><code>deckcraft-cli convert deck/proposal.deckcraft deck/proposal.pptx</code></pre></div><div class="cmd"><div class="cmd-head"><span>PDF に変換する</span><span class="cmd-meta">終了コード 0 / 383 ms</span><button type="button" class="copy" data-copy="deckcraft-cli convert deck/proposal.deckcraft deck/proposal.pdf">コピー</button></div><pre tabindex="0"><code>deckcraft-cli convert deck/proposal.deckcraft deck/proposal.pdf</code></pre></div><div class="cmd"><div class="cmd-head"><span>スライドを PNG に書き出す</span><span class="cmd-meta">終了コード 0 / 323 ms</span><button type="button" class="copy" data-copy="deckcraft-cli render deck/proposal.deckcraft --all --scale 1 deck/slides">コピー</button></div><pre tabindex="0"><code>deckcraft-cli render deck/proposal.deckcraft --all --scale 1 deck/slides</code></pre></div></div>
+</section>
+<section class="tool stage-design" id="cad" data-cat="data">
+  <header class="tool-head">
+    <span class="stop" aria-hidden="true">02</span>
+    <div><p class="eyebrow">設計の工程 / 2D CAD</p><h3>CADCraft</h3></div>
+    <p class="ver">v0.18.0<br>コマンド 457</p>
+  </header>
+  <div class="tool-body">
+    <div class="tool-text">
+      <h4>何ができるか</h4><p>線、図形、寸法、画層をコマンドで作図し、DXF、DWG、PDF、PNG などに書き出します。AutoCAD 風の .scr スクリプトも使えます。 AutoCAD に近い位置づけのツールです。</p>
+      <h4>この案件で作ったもの</h4><p>改札の断面図と平面図。天井高 3,000 mm、ディスプレイ下端 2,200 mm、有効距離 2,000〜4,000 mm を寸法線で示しました。</p>
+      <h4>対応形式</h4><p class="formats">読み: dxf / dwg / svg / svgz　書き: dxf / dwg / dwt / svg / png / pdf</p>
+      <p class="note"><strong>補足</strong> 負の値から始まる --window は、--window=-3000,… のように = でつなぎます。</p>
+    </div>
+    <div class="tool-media"><figure class="shot tall"><img src="assets/cad-gate.png" alt="改札の断面図と平面図" loading="lazy"></figure></div>
+  </div>
+  <div class="cmds"><h4>実際に実行したコマンド</h4><div class="cmd"><div class="cmd-head"><span>断面図と平面図を作図して DXF に保存する</span><span class="cmd-meta">終了コード 0 / 121 ms</span><button type="button" class="copy" data-copy="cadcraft-cli run --metric --cmd 'layer.new {&quot;name&quot;:&quot;STRUCT&quot;,&quot;color&quot;:&quot;white&quot;,&quot;lineweight&quot;:0.5}' --cmd 'layer.new {&quot;name&quot;:&quot;EQUIP&quot;,&quot;color&quot;:4,&quot;lineweight&quot;:0.35}' --cmd 'layer.new {&quot;name&quot;:&quot;ZONE&quot;,&quot;color&quot;:3,&quot;lineweight&quot;:0.35}' --cmd 'layer.new {&quot;name&quot;:&quot;PERSON&quot;,&quot;color&quot;:8,&quot;lineweight&quot;:0.25}' --cmd 'layer.new {&quot;name&quot;:&quot;DIM&quot;,&quot;color&quot;:1,&quot;lineweight&quot;:0.18}' --cmd 'layer.new {&quot;name&quot;:&quot;NOTE&quot;,&quot;color&quot;:&quot;white&quot;,&quot;lineweight&quot;:0.18}' --cmd 'dimstyle {&quot;name&quot;:&quot;MM&quot;,&quot;current&quot;:true,&quot;DIMTXT&quot;:110,&quot;DIMASZ&quot;:90,&quot;DIMEXO&quot;:40,&quot;DIMEXE&quot;:60,&quot;DIMGAP&quot;:30}' --cmd 'layer.current {&quot;name&quot;:&quot;STRUCT&quot;}' --cmd 'line {&quot;points&quot;:[[-2200,0],[6400,0]]}' --cmd 'line {&quot;points&quot;:[[-2200,3000],[6400,3000]]}' --cmd 'layer.current {&quot;name&quot;:&quot;EQUIP&quot;}' --cmd 'rectang {&quot;p1&quot;:[-90,2200],&quot;p2&quot;:[0,2800]}' --cmd 'line {&quot;points&quot;:[[-45,2800],[-45,3000]]}' --cmd 'rectang {&quot;p1&quot;:[0,2455],&quot;p2&quot;:[130,2545]}' --cmd 'rectang {&quot;p1&quot;:[-1500,0],&quot;p2&quot;:[-300,1000]}' --cmd 'layer.current {&quot;name&quot;:&quot;ZONE&quot;}' --cmd 'rectang {&quot;p1&quot;:[2000,0],&quot;p2&quot;:[4000,60]}' --cmd 'line {&quot;points&quot;:[[130,2500],[4000,1500]]}' --cmd 'line {&quot;points&quot;:[[130,2500],[2000,1500]]}' --cmd 'line {&quot;points&quot;:[[2000,0],[2000,1700]]}' --cmd 'line {&quot;points&quot;:[[4000,0],[4000,1700]]}' --cmd 'layer.current {&quot;name&quot;:&quot;PERSON&quot;}' --cmd 'circle {&quot;center&quot;:[3000,1590],&quot;radius&quot;:110}' --cmd 'rectang {&quot;p1&quot;:[2830,780],&quot;p2&quot;:[3170,1460]}' --cmd 'rectang {&quot;p1&quot;:[2880,0],&quot;p2&quot;:[3120,780]}' --cmd 'layer.current {&quot;name&quot;:&quot;DIM&quot;}' --cmd 'dimlinear {&quot;p1&quot;:[-2200,0],&quot;p2&quot;:[-2200,3000],&quot;at&quot;:[-2500,1500]}' --cmd 'dimlinear {&quot;p1&quot;:[-90,0],&quot;p2&quot;:[-90,2200],&quot;at&quot;:[-700,1300]}' --cmd 'dimlinear {&quot;p1&quot;:[130,0],&quot;p2&quot;:[130,2500],&quot;at&quot;:[520,1250]}' --cmd 'dimlinear {&quot;p1&quot;:[0,0],&quot;p2&quot;:[2000,0],&quot;at&quot;:[1000,-320]}' --cmd 'dimlinear {&quot;p1&quot;:[0,0],&quot;p2&quot;:[4000,0],&quot;at&quot;:[2000,-640]}' --cmd 'layer.current {&quot;name&quot;:&quot;NOTE&quot;}' --cmd 'text {&quot;at&quot;:[-2200,3240],&quot;text&quot;:&quot;断面図(架空の設定)&quot;,&quot;height&quot;:170}' --cmd 'text {&quot;at&quot;:[-1500,1100],&quot;text&quot;:&quot;改札機&quot;,&quot;height&quot;:130}' --cmd 'text {&quot;at&quot;:[230,2540],&quot;text&quot;:&quot;カメラ&quot;,&quot;height&quot;:130}' --cmd 'text {&quot;at&quot;:[-1200,2440],&quot;text&quot;:&quot;ディスプレイ&quot;,&quot;height&quot;:130}' --cmd 'text {&quot;at&quot;:[4150,150],&quot;text&quot;:&quot;有効距離 2.0-4.0m&quot;,&quot;height&quot;:130}' --cmd 'layer.current {&quot;name&quot;:&quot;STRUCT&quot;}' --cmd 'line {&quot;points&quot;:[[-2200,-2650],[6400,-2650]]}' --cmd 'line {&quot;points&quot;:[[-2200,-6150],[6400,-6150]]}' --cmd 'layer.current {&quot;name&quot;:&quot;EQUIP&quot;}' --cmd 'rectang {&quot;p1&quot;:[-1500,-5710],&quot;p2&quot;:[-300,-5490]}' --cmd 'rectang {&quot;p1&quot;:[-1500,-4510],&quot;p2&quot;:[-300,-4290]}' --cmd 'rectang {&quot;p1&quot;:[-1500,-3310],&quot;p2&quot;:[-300,-3090]}' --cmd 'rectang {&quot;p1&quot;:[-90,-5300],&quot;p2&quot;:[0,-3500]}' --cmd 'layer.current {&quot;name&quot;:&quot;ZONE&quot;}' --cmd 'rectang {&quot;p1&quot;:[2000,-5800],&quot;p2&quot;:[4000,-3000]}' --cmd 'layer.current {&quot;name&quot;:&quot;DIM&quot;}' --cmd 'dimlinear {&quot;p1&quot;:[2000,-5800],&quot;p2&quot;:[4000,-5800],&quot;at&quot;:[3000,-6500]}' --cmd 'layer.current {&quot;name&quot;:&quot;NOTE&quot;}' --cmd 'text {&quot;at&quot;:[-2200,-2350],&quot;text&quot;:&quot;平面図&quot;,&quot;height&quot;:170}' --cmd 'text {&quot;at&quot;:[2300,-4400],&quot;text&quot;:&quot;認証エリア(架空)&quot;,&quot;height&quot;:130}' --save cad/gate.dxf">コピー</button></div><pre tabindex="0"><code>cadcraft-cli run --metric --cmd 'layer.new {&quot;name&quot;:&quot;STRUCT&quot;,&quot;color&quot;:&quot;white&quot;,&quot;lineweight&quot;:0.5}' --cmd 'layer.new {&quot;name&quot;:&quot;EQUIP&quot;,&quot;color&quot;:4,&quot;lineweight&quot;:0.35}' … ほか 50 個の --cmd … --save cad/gate.dxf</code></pre></div><div class="cmd"><div class="cmd-head"><span>図面全体を PNG に書き出す</span><span class="cmd-meta">終了コード 0 / 137 ms</span><button type="button" class="copy" data-copy="cadcraft-cli run cad/gate.dxf --export cad/gate.png --window=-3000,-6900,6800,3700">コピー</button></div><pre tabindex="0"><code>cadcraft-cli run cad/gate.dxf --export cad/gate.png --window=-3000,-6900,6800,3700</code></pre></div><div class="cmd"><div class="cmd-head"><span>図面を PDF に変換する</span><span class="cmd-meta">終了コード 0 / 117 ms</span><button type="button" class="copy" data-copy="cadcraft-cli convert cad/gate.dxf cad/gate.pdf">コピー</button></div><pre tabindex="0"><code>cadcraft-cli convert cad/gate.dxf cad/gate.pdf</code></pre></div></div>
+</section>
+<section class="tool stage-design" id="grid" data-cat="data">
+  <header class="tool-head">
+    <span class="stop" aria-hidden="true">03</span>
+    <div><p class="eyebrow">設計の工程 / 表計算</p><h3>GridCraft</h3></div>
+    <p class="ver">v0.17.0<br>コマンド 385</p>
+  </header>
+  <div class="tool-body">
+    <div class="tool-text">
+      <h4>何ができるか</h4><p>セルの値、数式、書式、グラフをコマンドで作り、xlsx、CSV、HTML、PDF に変換します。数式だけを評価する eval も使えます。 Excel に近い位置づけのツールです。</p>
+      <h4>この案件で作ったもの</h4><p>距離別の認証試験表(架空データ)。成功率と有効距離内の平均は数式で計算し、折れ線グラフを付けました。</p>
+      <h4>対応形式</h4><p class="formats">入出力: xlsx / csv / tsv / json / html / pdf</p>
+      <p class="note warn"><strong>制約</strong> PDF に書き出すと日本語が空白になりました。Noto Sans JP を指定しても同じだったため、この表の見出しは英語です。</p>
+    </div>
+    <div class="tool-media"><figure class="shot crop"><img src="assets/grid-trial.png" alt="距離別の認証試験表とグラフ" loading="lazy"></figure></div>
+  </div>
+  <div class="cmds"><h4>実際に実行したコマンド</h4><div class="cmd"><div class="cmd-head"><span>試験表と数式とグラフを作り xlsx に保存する</span><span class="cmd-meta">終了コード 0 / 85 ms</span><button type="button" class="copy" data-copy="gridcraft-cli run --script grid/trial.txt --out grid/trial.xlsx --print A3:E13">コピー</button></div><pre tabindex="0"><code>gridcraft-cli run --script grid/trial.txt --out grid/trial.xlsx --print A3:E13</code></pre></div><div class="cmd"><div class="cmd-head"><span>表を PDF に変換する</span><span class="cmd-meta">終了コード 0 / 84 ms</span><button type="button" class="copy" data-copy="gridcraft-cli convert grid/trial.xlsx grid/trial.pdf">コピー</button></div><pre tabindex="0"><code>gridcraft-cli convert grid/trial.xlsx grid/trial.pdf</code></pre></div></div>
+</section>
+<section class="tool stage-design" id="fig" data-cat="ui">
+  <header class="tool-head">
+    <span class="stop" aria-hidden="true">04</span>
+    <div><p class="eyebrow">設計の工程 / UI デザイン</p><h3>FigCraft</h3></div>
+    <p class="ver">v0.16.0<br>コマンド 636</p>
+  </header>
+  <div class="tool-body">
+    <div class="tool-text">
+      <h4>何ができるか</h4><p>フレーム、図形、テキストを JSON スクリプトで配置し、PNG、SVG、PDF などに書き出します。Figma の REST API JSON や .sketch も読めます。 Figma に近い位置づけのツールです。</p>
+      <h4>この案件で作ったもの</h4><p>1920×1080 のディスプレイ画面レイアウト。タイトル、人型、注記の領域と、3 種類の判定の見え方を整理しました。</p>
+      <h4>対応形式</h4><p class="formats">読み: .figcraft / .json / .fig / .sketch / .svg / 画像　書き: png / jpg / svg / webp / pdf / fig</p>
+      
+    </div>
+    <div class="tool-media"><figure class="shot"><img src="assets/fig-layout.png" alt="ディスプレイの画面レイアウト" loading="lazy"></figure></div>
+  </div>
+  <div class="cmds"><h4>実際に実行したコマンド</h4><div class="cmd"><div class="cmd-head"><span>画面レイアウトをスクリプトで組む</span><span class="cmd-meta">終了コード 0 / 108 ms</span><button type="button" class="copy" data-copy="figcraft-cli run fig/layout.json --out fig/layout.figcraft">コピー</button></div><pre tabindex="0"><code>figcraft-cli run fig/layout.json --out fig/layout.figcraft</code></pre></div><div class="cmd"><div class="cmd-head"><span>レイアウトを PNG に書き出す</span><span class="cmd-meta">終了コード 0 / 109 ms</span><button type="button" class="copy" data-copy="figcraft-cli render fig/layout.figcraft --out fig/layout.png --scale 0.5">コピー</button></div><pre tabindex="0"><code>figcraft-cli render fig/layout.figcraft --out fig/layout.png --scale 0.5</code></pre></div><div class="cmd"><div class="cmd-head"><span>SVG に変換する</span><span class="cmd-meta">終了コード 0 / 97 ms</span><button type="button" class="copy" data-copy="figcraft-cli convert fig/layout.figcraft fig/layout.svg">コピー</button></div><pre tabindex="0"><code>figcraft-cli convert fig/layout.figcraft fig/layout.svg</code></pre></div></div>
+</section>
+<section class="tool stage-asset" id="vector" data-cat="image">
+  <header class="tool-head">
+    <span class="stop" aria-hidden="true">05</span>
+    <div><p class="eyebrow">素材の工程 / ベクター描画</p><h3>VectorCraft</h3></div>
+    <p class="ver">v0.22.0<br>コマンド 933</p>
+  </header>
+  <div class="tool-body">
+    <div class="tool-text">
+      <h4>何ができるか</h4><p>パス、図形、文字をコマンドで描き、SVG、PDF、PNG などに書き出します。文字のアウトライン化もできます。 Illustrator に近い位置づけのツールです。</p>
+      <h4>この案件で作ったもの</h4><p>ロゴ、3 色の人型、OK/NG の印。カメラ視点の通路図は、シナリオと同じ投影式で座標を計算して描きました。</p>
+      <h4>対応形式</h4><p class="formats">読み: .vectorcraft / .svg / .pdf / .ai / .eps / .psd / .dxf など　書き: .svg / .pdf / .ai / .png / .dxf / .eps など</p>
+      <p class="note"><strong>補足</strong> paint.setFill は選択中の図形にも効きます。別の色で描くときは先に select.none を実行します。</p>
+    </div>
+    <div class="tool-media"><figure class="shot plain"><img src="assets/vector-logo.png" alt="TOORU のロゴ" loading="lazy"></figure><div class="row"><figure><img src="assets/vector-person-ok.svg" alt="認証 OK" loading="lazy"><figcaption>認証 OK</figcaption></figure><figure><img src="assets/vector-person-ng.svg" alt="認証 NG" loading="lazy"><figcaption>認証 NG</figcaption></figure><figure><img src="assets/vector-person-none.svg" alt="未判定" loading="lazy"><figcaption>未判定</figcaption></figure><figure><img src="assets/vector-mark-ok.svg" alt="OK の印" loading="lazy"><figcaption>OK の印</figcaption></figure><figure><img src="assets/vector-mark-ng.svg" alt="NG の印" loading="lazy"><figcaption>NG の印</figcaption></figure></div></div>
+  </div>
+  <div class="cmds"><h4>実際に実行したコマンド</h4><div class="cmd"><div class="cmd-head"><span>人型を描いて PNG と SVG に書き出す</span><span class="cmd-meta">終了コード 0 / 209 ms</span><button type="button" class="copy" data-copy="vectorcraft-cli run --commands vector/person-ok.jsonl --export vector/person-ok.png --export vector/person-ok.svg --scale 1">コピー</button></div><pre tabindex="0"><code>vectorcraft-cli run --commands vector/person-ok.jsonl --export vector/person-ok.png --export vector/person-ok.svg --scale 1</code></pre></div><div class="cmd"><div class="cmd-head"><span>ロゴを描いて書き出す</span><span class="cmd-meta">終了コード 0 / 277 ms</span><button type="button" class="copy" data-copy="vectorcraft-cli run --commands vector/logo.jsonl --export vector/logo.vectorcraft --export vector/logo.png --scale 2">コピー</button></div><pre tabindex="0"><code>vectorcraft-cli run --commands vector/logo.jsonl --export vector/logo.vectorcraft --export vector/logo.png --scale 2</code></pre></div><div class="cmd"><div class="cmd-head"><span>文字をアウトライン化した SVG に変換する</span><span class="cmd-meta">終了コード 0 / 178 ms</span><button type="button" class="copy" data-copy="vectorcraft-cli convert vector/logo.vectorcraft vector/logo.svg --outline-text">コピー</button></div><pre tabindex="0"><code>vectorcraft-cli convert vector/logo.vectorcraft vector/logo.svg --outline-text</code></pre></div><div class="cmd"><div class="cmd-head"><span>カメラ視点の通路図を座標から描く</span><span class="cmd-meta">終了コード 0 / 185 ms</span><button type="button" class="copy" data-copy="vectorcraft-cli run --commands vector/camera-view.jsonl --export vector/camera-view.png --scale 1">コピー</button></div><pre tabindex="0"><code>vectorcraft-cli run --commands vector/camera-view.jsonl --export vector/camera-view.png --scale 1</code></pre></div></div>
+</section>
+<section class="tool stage-asset" id="photo" data-cat="image">
+  <header class="tool-head">
+    <span class="stop" aria-hidden="true">06</span>
+    <div><p class="eyebrow">素材の工程 / ラスター画像編集</p><h3>PhotoCraft</h3></div>
+    <p class="ver">v0.21.0<br>コマンド 993</p>
+  </header>
+  <div class="tool-body">
+    <div class="tool-text">
+      <h4>何ができるか</h4><p>レイヤー、フィルター、文字、調整レイヤーをコマンドで重ね、PNG、PSD、DDS などに保存します。フォルダ単位の一括処理もできます。 Photoshop に近い位置づけのツールです。</p>
+      <h4>この案件で作ったもの</h4><p>人型と印を合成した透過 PNG と、ぼかしとノイズを加えたカメラ映像風の画像。</p>
+      <h4>対応形式</h4><p class="formats">.pcraft / .psd / .png / .jpg / .tif / .webp / .exr / .tga / .dpx / .dds など</p>
+      
+    </div>
+    <div class="tool-media"><figure class="shot"><img src="assets/photo-camera-frame.png" alt="カメラ映像風の合成画像" loading="lazy"></figure><div class="row dark"><figure><img src="assets/photo-person-ok.png" alt="透過 PNG: OK" loading="lazy"><figcaption>透過 PNG: OK</figcaption></figure><figure><img src="assets/photo-person-ng.png" alt="透過 PNG: NG" loading="lazy"><figcaption>透過 PNG: NG</figcaption></figure><figure><img src="assets/photo-person-none.png" alt="透過 PNG: 未判定" loading="lazy"><figcaption>透過 PNG: 未判定</figcaption></figure></div></div>
+  </div>
+  <div class="cmds"><h4>実際に実行したコマンド</h4><div class="cmd"><div class="cmd-head"><span>人型と印を合成して透過 PNG にする</span><span class="cmd-meta">終了コード 0 / 229 ms</span><button type="button" class="copy" data-copy="photocraft-cli run --new '{&quot;width&quot;:500,&quot;height&quot;:1200,&quot;background&quot;:&quot;transparent&quot;,&quot;name&quot;:&quot;person-ok&quot;}' --cmd file.placeEmbedded --params '{&quot;path&quot;:&quot;D:/work/art-craft-test/build/vector/person-ok.png&quot;,&quot;center&quot;:[250,700],&quot;scale&quot;:100,&quot;fit&quot;:false,&quot;smartObject&quot;:false}' --cmd layer.layerStyle.outerGlow --params '{&quot;color&quot;:&quot;#35D07F&quot;,&quot;opacity&quot;:70,&quot;size&quot;:24,&quot;spread&quot;:8}' --cmd file.placeEmbedded --params '{&quot;path&quot;:&quot;D:/work/art-craft-test/build/vector/mark-ok.png&quot;,&quot;center&quot;:[250,105],&quot;scale&quot;:95,&quot;fit&quot;:false,&quot;smartObject&quot;:false}' --out photo/person-ok.png">コピー</button></div><pre tabindex="0"><code>photocraft-cli run --new '{&quot;width&quot;:500,&quot;height&quot;:1200,&quot;background&quot;:&quot;transparent&quot;,&quot;name&quot;:&quot;person-ok&quot;}' --cmd file.placeEmbedded --params '{&quot;path&quot;:&quot;D:/work/art-craft-test/build/vector/person-ok.png&quot;,&quot;center&quot;:[250,700],&quot;scale&quot;:100,&quot;fit&quot;:false,&quot;sm…' --cmd layer.layerStyle.outerGlow --params '{&quot;color&quot;:&quot;#35D07F&quot;,&quot;opacity&quot;:70,&quot;size&quot;:24,&quot;spread&quot;:8}' … ほか 1 個の --cmd … --params '{&quot;path&quot;:&quot;D:/work/art-craft-test/build/vector/mark-ok.png&quot;,&quot;center&quot;:[250,105],&quot;scale&quot;:95,&quot;fit&quot;:false,&quot;smart…' --out photo/person-ok.png</code></pre></div><div class="cmd"><div class="cmd-head"><span>カメラ映像風の画像を合成する</span><span class="cmd-meta">終了コード 0 / 487 ms</span><button type="button" class="copy" data-copy="photocraft-cli run D:/work/art-craft-test/build/vector/camera-view.png --cmd filter.blur.gaussianBlur --params '{&quot;radius&quot;:1.6}' --cmd filter.noise.addNoise --params '{&quot;amount&quot;:5,&quot;distribution&quot;:&quot;gaussian&quot;,&quot;monochromatic&quot;:true,&quot;seed&quot;:7}' --cmd file.placeEmbedded --params '{&quot;path&quot;:&quot;D:/work/art-craft-test/build/photo/person-ok.png&quot;,&quot;center&quot;:[753.5,832.97],&quot;scale&quot;:54.92999999999999,&quot;fit&quot;:false,&quot;smartObject&quot;:false}' --cmd layer.newAdjustmentLayer.colorLookup --params '{&quot;lut&quot;:&quot;cool&quot;}' --cmd type.create --params '{&quot;x&quot;:48,&quot;y&quot;:72,&quot;text&quot;:&quot;CAM-01  3.33s  距離 2.82m  シミュレーション&quot;,&quot;font&quot;:&quot;Noto Sans JP&quot;,&quot;size&quot;:34,&quot;color&quot;:&quot;#FFFFFF&quot;}' --out photo/camera-frame.png">コピー</button></div><pre tabindex="0"><code>photocraft-cli run D:/work/art-craft-test/build/vector/camera-view.png --cmd filter.blur.gaussianBlur --params '{&quot;radius&quot;:1.6}' --cmd filter.noise.addNoise --params '{&quot;amount&quot;:5,&quot;distribution&quot;:&quot;gaussian&quot;,&quot;monochromatic&quot;:true,&quot;seed&quot;:7}' … ほか 3 個の --cmd … --params '{&quot;path&quot;:&quot;D:/work/art-craft-test/build/photo/person-ok.png&quot;,&quot;center&quot;:[753.5,832.97],&quot;scale&quot;:54.929999999999…' --params '{&quot;lut&quot;:&quot;cool&quot;}' --params '{&quot;x&quot;:48,&quot;y&quot;:72,&quot;text&quot;:&quot;CAM-01  3.33s  距離 2.82m  シミュレーション&quot;,&quot;font&quot;:&quot;Noto Sans JP&quot;,&quot;size&quot;:34,&quot;color&quot;:&quot;#FFFFFF&quot;}' --out photo/camera-frame.png</code></pre></div></div>
+</section>
+<section class="tool stage-asset" id="light" data-cat="image">
+  <header class="tool-head">
+    <span class="stop" aria-hidden="true">07</span>
+    <div><p class="eyebrow">素材の工程 / 写真現像</p><h3>LightCraft</h3></div>
+    <p class="ver">v0.19.0<br>コマンド 389</p>
+  </header>
+  <div class="tool-body">
+    <div class="tool-text">
+      <h4>何ができるか</h4><p>写真の露出やシャドウなどをスライダー単位で調整し、JPEG、TIFF、AVIF などに書き出します。HDR やパノラマの合成もできます。 Lightroom に近い位置づけのツールです。</p>
+      <h4>この案件で作ったもの</h4><p>PhotoCraft の画像を暗い時間帯の映像に見立て、露出とシャドウの補正前後を比べました。</p>
+      <h4>対応形式</h4><p class="formats">書き: jpg / png / tif / webp / avif / jxl / psd / dng</p>
+      <p class="note"><strong>補足</strong> 内蔵デモの写真は風景だったため、題材に合う PhotoCraft の画像を入力にしました。</p>
+    </div>
+    <div class="tool-media"><div class="pair"><figure><img src="assets/light-before.jpg" alt="補正前" loading="lazy"><figcaption>補正前</figcaption></figure><figure><img src="assets/light-after.jpg" alt="補正後" loading="lazy"><figcaption>補正後</figcaption></figure></div></div>
+  </div>
+  <div class="cmds"><h4>実際に実行したコマンド</h4><div class="cmd"><div class="cmd-head"><span>露出を下げて暗い映像を再現する</span><span class="cmd-meta">終了コード 0 / 1.2 秒</span><button type="button" class="copy" data-copy="lightcraft-cli render photo/camera-frame.png -o light/before.jpg --set light.exposure=-1.8 --size 960">コピー</button></div><pre tabindex="0"><code>lightcraft-cli render photo/camera-frame.png -o light/before.jpg --set light.exposure=-1.8 --size 960</code></pre></div><div class="cmd"><div class="cmd-head"><span>露出とシャドウを補正して書き出す</span><span class="cmd-meta">終了コード 0 / 1.2 秒</span><button type="button" class="copy" data-copy="lightcraft-cli render light/before.jpg -o light/after.jpg --set light.exposure=1.6 --set light.shadows=40 --size 960">コピー</button></div><pre tabindex="0"><code>lightcraft-cli render light/before.jpg -o light/after.jpg --set light.exposure=1.6 --set light.shadows=40 --size 960</code></pre></div></div>
+</section>
+<section class="tool stage-asset" id="sound" data-cat="av">
+  <header class="tool-head">
+    <span class="stop" aria-hidden="true">08</span>
+    <div><p class="eyebrow">素材の工程 / オーディオ編集</p><h3>SoundCraft</h3></div>
+    <p class="ver">v0.18.0<br>コマンド 483</p>
+  </header>
+  <div class="tool-body">
+    <div class="tool-text">
+      <h4>何ができるか</h4><p>トラック、MIDI、プラグインをコマンドで組んでミックスダウンします。音声ファイルの変換や音量の正規化もできます。 Audition に近い位置づけのツールです。</p>
+      <h4>この案件で作ったもの</h4><p>認証 OK/NG の効果音。録音素材は使わず、内蔵シンセに MIDI ノートを入力して合成しました。</p>
+      <h4>対応形式</h4><p class="formats">読み: wav / aiff / flac / mp3 / ogg / m4a など　書き: wav / bwf / aiff / flac</p>
+      <p class="note"><strong>補足</strong> 書き出しは mp3 に対応していないため、WAV のまま掲載しています。音の印象は耳では確認しておらず、ピークと長さの数値だけを確認しました。</p>
+    </div>
+    <div class="tool-media"><div class="sounds"><div class="sound"><strong>認証 OK 音</strong><span>上がる 2 音</span><audio controls preload="none" src="assets/sound-ok.wav"></audio></div><div class="sound"><strong>認証 NG 音</strong><span>低い同じ音を 2 回</span><audio controls preload="none" src="assets/sound-ng.wav"></audio></div></div></div>
+  </div>
+  <div class="cmds"><h4>実際に実行したコマンド</h4><div class="cmd"><div class="cmd-head"><span>認証 OK 音を MIDI ノートから合成する</span><span class="cmd-meta">終了コード 0 / 131 ms</span><button type="button" class="copy" data-copy="soundcraft-cli run --cmd 'track.new={&quot;kind&quot;:&quot;instrument&quot;,&quot;format&quot;:&quot;stereo&quot;,&quot;name&quot;:&quot;OK&quot;,&quot;instrument&quot;:&quot;subtractive_synth&quot;}' --cmd 'mix.insert={&quot;track&quot;:1,&quot;plugin&quot;:&quot;plate_reverb&quot;,&quot;params&quot;:{&quot;mix&quot;:22,&quot;decay&quot;:0.8}}' --cmd 'midi.new_clip={&quot;track&quot;:1,&quot;start&quot;:0,&quot;length&quot;:48000}' --cmd 'midi.note_add={&quot;clip&quot;:2,&quot;pitch&quot;:76,&quot;start_ticks&quot;:0,&quot;length_ticks&quot;:180,&quot;velocity&quot;:120}' --cmd 'midi.note_add={&quot;clip&quot;:2,&quot;pitch&quot;:83,&quot;start_ticks&quot;:180,&quot;length_ticks&quot;:420,&quot;velocity&quot;:120}' --bounce sound/ok-raw.wav --start 0 --end 1.0">コピー</button></div><pre tabindex="0"><code>soundcraft-cli run --cmd 'track.new={&quot;kind&quot;:&quot;instrument&quot;,&quot;format&quot;:&quot;stereo&quot;,&quot;name&quot;:&quot;OK&quot;,&quot;instrument&quot;:&quot;subtractive_synth&quot;}' --cmd 'mix.insert={&quot;track&quot;:1,&quot;plugin&quot;:&quot;plate_reverb&quot;,&quot;params&quot;:{&quot;mix&quot;:22,&quot;decay&quot;:0.8}}' … ほか 3 個の --cmd … --bounce sound/ok-raw.wav --start 0 --end 1.0</code></pre></div><div class="cmd"><div class="cmd-head"><span>認証 NG 音を MIDI ノートから合成する</span><span class="cmd-meta">終了コード 0 / 117 ms</span><button type="button" class="copy" data-copy="soundcraft-cli run --cmd 'track.new={&quot;kind&quot;:&quot;instrument&quot;,&quot;format&quot;:&quot;stereo&quot;,&quot;name&quot;:&quot;NG&quot;,&quot;instrument&quot;:&quot;subtractive_synth&quot;}' --cmd 'mix.insert={&quot;track&quot;:1,&quot;plugin&quot;:&quot;plate_reverb&quot;,&quot;params&quot;:{&quot;mix&quot;:12,&quot;decay&quot;:0.5}}' --cmd 'midi.new_clip={&quot;track&quot;:1,&quot;start&quot;:0,&quot;length&quot;:48000}' --cmd 'midi.note_add={&quot;clip&quot;:2,&quot;pitch&quot;:52,&quot;start_ticks&quot;:0,&quot;length_ticks&quot;:200,&quot;velocity&quot;:120}' --cmd 'midi.note_add={&quot;clip&quot;:2,&quot;pitch&quot;:52,&quot;start_ticks&quot;:280,&quot;length_ticks&quot;:320,&quot;velocity&quot;:120}' --bounce sound/ng-raw.wav --start 0 --end 1.0">コピー</button></div><pre tabindex="0"><code>soundcraft-cli run --cmd 'track.new={&quot;kind&quot;:&quot;instrument&quot;,&quot;format&quot;:&quot;stereo&quot;,&quot;name&quot;:&quot;NG&quot;,&quot;instrument&quot;:&quot;subtractive_synth&quot;}' --cmd 'mix.insert={&quot;track&quot;:1,&quot;plugin&quot;:&quot;plate_reverb&quot;,&quot;params&quot;:{&quot;mix&quot;:12,&quot;decay&quot;:0.5}}' … ほか 3 個の --cmd … --bounce sound/ng-raw.wav --start 0 --end 1.0</code></pre></div><div class="cmd"><div class="cmd-head"><span>音量を正規化して 16bit WAV にする</span><span class="cmd-meta">終了コード 0 / 118 ms</span><button type="button" class="copy" data-copy="soundcraft-cli convert sound/ok-raw.wav sound/ok.wav --bit-depth 16 --normalize">コピー</button></div><pre tabindex="0"><code>soundcraft-cli convert sound/ok-raw.wav sound/ok.wav --bit-depth 16 --normalize</code></pre></div></div>
+</section>
+<section class="tool stage-video" id="effect" data-cat="av">
+  <header class="tool-head">
+    <span class="stop" aria-hidden="true">09</span>
+    <div><p class="eyebrow">映像の工程 / モーショングラフィックス</p><h3>EffectCraft</h3></div>
+    <p class="ver">v0.22.0<br>コマンド 760</p>
+  </header>
+  <div class="tool-body">
+    <div class="tool-text">
+      <h4>何ができるか</h4><p>コンポジションを JavaScript で組み立て、キーフレーム付きの映像をレンダリングします。テンプレートに値を流し込むこともできます。 After Effects に近い位置づけのツールです。</p>
+      <h4>この案件で作ったもの</h4><p>ディスプレイの背景動画 15 秒。流れる光の帯と駅名の表示を、1 本のスクリプトで作りました。</p>
+      <h4>対応形式</h4><p class="formats">書き: h264 / hevc / av1 / prores / webm / 連番画像 / gif / wav / aiff</p>
+      
+    </div>
+    <div class="tool-media"><figure class="shot"><img src="assets/effect-frame.png" alt="背景動画の 1 フレーム" loading="lazy"></figure></div>
+  </div>
+  <div class="cmds"><h4>実際に実行したコマンド</h4><div class="cmd"><div class="cmd-head"><span>JavaScript でコンポジションを組み立てる</span><span class="cmd-meta">終了コード 0 / 293 ms</span><button type="button" class="copy" data-copy="effectcraft-cli script ../scripts/display-bg.jsx --empty --save-as effect/bg.ecproj">コピー</button></div><pre tabindex="0"><code>effectcraft-cli script ../scripts/display-bg.jsx --empty --save-as effect/bg.ecproj</code></pre></div><div class="cmd"><div class="cmd-head"><span>15 秒の背景動画をレンダリングする</span><span class="cmd-meta">終了コード 0 / 7.5 秒</span><button type="button" class="copy" data-copy="effectcraft-cli render --project effect/bg.ecproj --comp display-bg --out effect/display-bg.mp4 --format h264 --bitrate 8000">コピー</button></div><pre tabindex="0"><code>effectcraft-cli render --project effect/bg.ecproj --comp display-bg --out effect/display-bg.mp4 --format h264 --bitrate 8000</code></pre></div><div class="cmd"><div class="cmd-head"><span>確認用に 1 フレームを PNG にする</span><span class="cmd-meta">終了コード 0 / 210 ms</span><button type="button" class="copy" data-copy="effectcraft-cli render-frame --project effect/bg.ecproj --comp display-bg --time 5 --out effect/display-bg.png --max-side 960">コピー</button></div><pre tabindex="0"><code>effectcraft-cli render-frame --project effect/bg.ecproj --comp display-bg --time 5 --out effect/display-bg.png --max-side 960</code></pre></div></div>
+</section>
+<section class="tool stage-video" id="film" data-cat="av">
+  <header class="tool-head">
+    <span class="stop" aria-hidden="true">10</span>
+    <div><p class="eyebrow">映像の工程 / 動画編集</p><h3>FilmCraft</h3></div>
+    <p class="ver">v0.18.0<br>コマンド 717</p>
+  </header>
+  <div class="tool-body">
+    <div class="tool-text">
+      <h4>何ができるか</h4><p>シーケンスに素材を並べ、キーフレームや音を編集して書き出します。読み込みから書き出しまでスクリプトで実行できます。 Premiere に近い位置づけのツールです。</p>
+      <h4>この案件で作ったもの</h4><p>背景動画、人型、効果音を統合した完成動画。カメラ座標をそのままキーフレームにしました。完成動画はページ冒頭で再生できます。</p>
+      <h4>対応形式</h4><p class="formats">書き: h264 / hevc / prores / dnxhr / png / gif / wav / aac など</p>
+      
+    </div>
+    <div class="tool-media"><div class="pair"><figure><img src="assets/film-frame-ng.png" alt="認証 NG の瞬間" loading="lazy"><figcaption>認証 NG の瞬間</figcaption></figure><figure><img src="assets/film-frame-none.png" alt="有効距離の外を通る人物" loading="lazy"><figcaption>有効距離の外を通る人物</figcaption></figure></div></div>
+  </div>
+  <div class="cmds"><h4>実際に実行したコマンド</h4><div class="cmd"><div class="cmd-head"><span>シーケンスを作り素材を読み込む</span><span class="cmd-meta">終了コード 0 / 175 ms</span><button type="button" class="copy" data-copy="filmcraft-cli --compact --save-as film/tooru.fcproj run film/1-import.jsonl">コピー</button></div><pre tabindex="0"><code>filmcraft-cli --compact --save-as film/tooru.fcproj run film/1-import.jsonl</code></pre></div><div class="cmd"><div class="cmd-head"><span>背景、人型、効果音をタイムラインに置く</span><span class="cmd-meta">終了コード 0 / 214 ms</span><button type="button" class="copy" data-copy="filmcraft-cli --compact --project film/tooru.fcproj --save run film/2-place.jsonl">コピー</button></div><pre tabindex="0"><code>filmcraft-cli --compact --project film/tooru.fcproj --save run film/2-place.jsonl</code></pre></div><div class="cmd"><div class="cmd-head"><span>カメラ座標を 116 個のキーフレームとして書き込む</span><span class="cmd-meta">終了コード 0 / 186 ms</span><button type="button" class="copy" data-copy="filmcraft-cli --compact --project film/tooru.fcproj --save run film/3-keyframes.jsonl">コピー</button></div><pre tabindex="0"><code>filmcraft-cli --compact --project film/tooru.fcproj --save run film/3-keyframes.jsonl</code></pre></div><div class="cmd"><div class="cmd-head"><span>960×540 の H.264 に書き出す</span><span class="cmd-meta">終了コード 0 / 3.0 秒</span><button type="button" class="copy" data-copy="filmcraft-cli --project film/tooru.fcproj export film/tooru-display.mp4 --format h264 --scale 0.5 --quality 70">コピー</button></div><pre tabindex="0"><code>filmcraft-cli --project film/tooru.fcproj export film/tooru-display.mp4 --format h264 --scale 0.5 --quality 70</code></pre></div></div>
+</section>
+<section class="tool stage-doc" id="word" data-cat="document">
+  <header class="tool-head">
+    <span class="stop" aria-hidden="true">11</span>
+    <div><p class="eyebrow">文書の工程 / ワープロ</p><h3>WordCraft</h3></div>
+    <p class="ver">v0.16.0<br>コマンド 656</p>
+  </header>
+  <div class="tool-body">
+    <div class="tool-text">
+      <h4>何ができるか</h4><p>Markdown などの原稿を docx や PDF に変換します。コマンドでの文書編集や、コメント付きの出力もできます。 Word に近い位置づけのツールです。</p>
+      <h4>この案件で作ったもの</h4><p>A4 の仕様書。Markdown の原稿から docx を作り、PDF に変換しました。</p>
+      <h4>対応形式</h4><p class="formats">docx / doc(読みのみ) / pdf / odt / rtf / html / md / tex / txt / json / png / xml</p>
+      <p class="note"><strong>補足</strong> --save を 2 回指定すると docx しか保存されず、エラーも出ませんでした。ここでは変換を分けて実行しています。</p>
+    </div>
+    <div class="tool-media"><figure class="shot tall"><img src="assets/word-spec.png" alt="仕様書の 1 ページ目" loading="lazy"></figure></div>
+  </div>
+  <div class="cmds"><h4>実際に実行したコマンド</h4><div class="cmd"><div class="cmd-head"><span>Markdown 原稿を docx に変換する</span><span class="cmd-meta">終了コード 0 / 185 ms</span><button type="button" class="copy" data-copy="wordcraft-cli convert ../data/spec.md word/spec.docx">コピー</button></div><pre tabindex="0"><code>wordcraft-cli convert ../data/spec.md word/spec.docx</code></pre></div><div class="cmd"><div class="cmd-head"><span>docx を PDF に変換する</span><span class="cmd-meta">終了コード 0 / 118 ms</span><button type="button" class="copy" data-copy="wordcraft-cli convert word/spec.docx word/spec.pdf">コピー</button></div><pre tabindex="0"><code>wordcraft-cli convert word/spec.docx word/spec.pdf</code></pre></div><div class="cmd"><div class="cmd-head"><span>1 ページ目を PNG にする</span><span class="cmd-meta">終了コード 0 / 165 ms</span><button type="button" class="copy" data-copy="wordcraft-cli render word/spec.docx word/spec.png --page 1">コピー</button></div><pre tabindex="0"><code>wordcraft-cli render word/spec.docx word/spec.png --page 1</code></pre></div></div>
+</section>
+<section class="tool stage-doc" id="design" data-cat="document">
+  <header class="tool-head">
+    <span class="stop" aria-hidden="true">12</span>
+    <div><p class="eyebrow">文書の工程 / DTP・ページレイアウト</p><h3>DesignCraft</h3></div>
+    <p class="ver">v0.18.0<br>コマンド 555</p>
+  </header>
+  <div class="tool-body">
+    <div class="tool-text">
+      <h4>何ができるか</h4><p>テキストフレーム、画像、カラースウォッチをコマンドで組版し、PNG や印刷用 PDF に書き出します。 InDesign に近い位置づけのツールです。</p>
+      <h4>この案件で作ったもの</h4><p>駅に掲示する A4 の利用案内チラシ。3 mm の塗り足しを付けて組版しました。</p>
+      <h4>対応形式</h4><p class="formats">書き: png / pdf / .designcraft など(PDF/X の検査機能つき)</p>
+      <p class="note warn"><strong>制約</strong> PDF/X-4 の検査は通っていません。RGB の色と画像が残っているため、印刷入稿には CMYK への変換が必要です。</p>
+    </div>
+    <div class="tool-media"><figure class="shot tall"><img src="assets/design-flyer.png" alt="利用案内のチラシ" loading="lazy"></figure></div>
+  </div>
+  <div class="cmds"><h4>実際に実行したコマンド</h4><div class="cmd"><div class="cmd-head"><span>A4 チラシを組版して PNG と PDF に書き出す</span><span class="cmd-meta">終了コード 0 / 740 ms</span><button type="button" class="copy" data-copy="designcraft-cli run --cmd 'file.new={&quot;preset&quot;:&quot;A4&quot;,&quot;title&quot;:&quot;TOORU 利用案内&quot;,&quot;margins&quot;:36,&quot;bleed&quot;:9,&quot;primaryTextFrame&quot;:false}' --cmd 'swatch.create={&quot;name&quot;:&quot;Navy&quot;,&quot;color&quot;:&quot;#0F2A44&quot;}' --cmd 'swatch.create={&quot;name&quot;:&quot;Teal&quot;,&quot;color&quot;:&quot;#0E8FB0&quot;}' --cmd 'swatch.create={&quot;name&quot;:&quot;OK&quot;,&quot;color&quot;:&quot;#12A150&quot;}' --cmd 'swatch.create={&quot;name&quot;:&quot;NG&quot;,&quot;color&quot;:&quot;#D92D20&quot;}' --cmd 'swatch.create={&quot;name&quot;:&quot;Mist&quot;,&quot;color&quot;:&quot;#E8F1F5&quot;}' --cmd 'frame.create={&quot;rect&quot;:[0,0,595,250],&quot;content&quot;:&quot;graphic&quot;}' --cmd 'object.fill={&quot;swatch&quot;:&quot;Navy&quot;}' --cmd 'object.stroke={&quot;weight&quot;:0}' --cmd 'frame.create={&quot;rect&quot;:[40,44,555,86],&quot;content&quot;:&quot;text&quot;,&quot;caret&quot;:true}' --cmd 'type.char={&quot;attrs&quot;:{&quot;fontFamily&quot;:&quot;Noto Sans JP&quot;,&quot;fontStyle&quot;:&quot;Medium&quot;,&quot;size&quot;:20,&quot;fill&quot;:&quot;Mist&quot;,&quot;leading&quot;:{&quot;kind&quot;:&quot;points&quot;,&quot;value&quot;:29}}}' --cmd 'text.insert={&quot;text&quot;:&quot;あさなぎ線 ひかり台駅&quot;,&quot;raw&quot;:true}' --cmd 'frame.create={&quot;rect&quot;:[40,88,555,170],&quot;content&quot;:&quot;text&quot;,&quot;caret&quot;:true}' --cmd 'type.char={&quot;attrs&quot;:{&quot;fontFamily&quot;:&quot;Noto Sans JP&quot;,&quot;fontStyle&quot;:&quot;Bold&quot;,&quot;size&quot;:40,&quot;fill&quot;:&quot;[Paper]&quot;,&quot;leading&quot;:{&quot;kind&quot;:&quot;points&quot;,&quot;value&quot;:58}}}' --cmd 'text.insert={&quot;text&quot;:&quot;顔で通れる改札を試します&quot;,&quot;raw&quot;:true}' --cmd 'frame.create={&quot;rect&quot;:[40,180,555,236],&quot;content&quot;:&quot;text&quot;,&quot;caret&quot;:true}' --cmd 'type.char={&quot;attrs&quot;:{&quot;fontFamily&quot;:&quot;Noto Sans JP&quot;,&quot;fontStyle&quot;:&quot;Regular&quot;,&quot;size&quot;:15,&quot;fill&quot;:&quot;Mist&quot;,&quot;leading&quot;:{&quot;kind&quot;:&quot;points&quot;,&quot;value&quot;:22}}}' --cmd 'text.insert={&quot;text&quot;:&quot;実証実験にご協力ください。登録された方は、改札の手前を普通に歩くだけで認証されます。&quot;,&quot;raw&quot;:true}' --cmd 'file.place={&quot;path&quot;:&quot;D:/work/art-craft-test/build/photo/camera-frame.png&quot;,&quot;x&quot;:40,&quot;y&quot;:272,&quot;width&quot;:515}' --cmd 'frame.create={&quot;rect&quot;:[40,572,290,580],&quot;content&quot;:&quot;graphic&quot;}' --cmd 'object.fill={&quot;swatch&quot;:&quot;OK&quot;}' --cmd 'object.stroke={&quot;weight&quot;:0}' --cmd 'frame.create={&quot;rect&quot;:[40,590,290,620],&quot;content&quot;:&quot;text&quot;,&quot;caret&quot;:true}' --cmd 'type.char={&quot;attrs&quot;:{&quot;fontFamily&quot;:&quot;Noto Sans JP&quot;,&quot;fontStyle&quot;:&quot;Bold&quot;,&quot;size&quot;:17,&quot;fill&quot;:&quot;Navy&quot;,&quot;leading&quot;:{&quot;kind&quot;:&quot;points&quot;,&quot;value&quot;:25}}}' --cmd 'text.insert={&quot;text&quot;:&quot;緑の人型とチェック印&quot;,&quot;raw&quot;:true}' --cmd 'frame.create={&quot;rect&quot;:[40,622,290,660],&quot;content&quot;:&quot;text&quot;,&quot;caret&quot;:true}' --cmd 'type.char={&quot;attrs&quot;:{&quot;fontFamily&quot;:&quot;Noto Sans JP&quot;,&quot;fontStyle&quot;:&quot;Regular&quot;,&quot;size&quot;:13,&quot;fill&quot;:&quot;Navy&quot;,&quot;leading&quot;:{&quot;kind&quot;:&quot;points&quot;,&quot;value&quot;:19}}}' --cmd 'text.insert={&quot;text&quot;:&quot;そのままお通りください。&quot;,&quot;raw&quot;:true}' --cmd 'frame.create={&quot;rect&quot;:[305,572,555,580],&quot;content&quot;:&quot;graphic&quot;}' --cmd 'object.fill={&quot;swatch&quot;:&quot;NG&quot;}' --cmd 'object.stroke={&quot;weight&quot;:0}' --cmd 'frame.create={&quot;rect&quot;:[305,590,555,620],&quot;content&quot;:&quot;text&quot;,&quot;caret&quot;:true}' --cmd 'type.char={&quot;attrs&quot;:{&quot;fontFamily&quot;:&quot;Noto Sans JP&quot;,&quot;fontStyle&quot;:&quot;Bold&quot;,&quot;size&quot;:17,&quot;fill&quot;:&quot;Navy&quot;,&quot;leading&quot;:{&quot;kind&quot;:&quot;points&quot;,&quot;value&quot;:25}}}' --cmd 'text.insert={&quot;text&quot;:&quot;赤の人型とバツ印&quot;,&quot;raw&quot;:true}' --cmd 'frame.create={&quot;rect&quot;:[305,622,555,660],&quot;content&quot;:&quot;text&quot;,&quot;caret&quot;:true}' --cmd 'type.char={&quot;attrs&quot;:{&quot;fontFamily&quot;:&quot;Noto Sans JP&quot;,&quot;fontStyle&quot;:&quot;Regular&quot;,&quot;size&quot;:13,&quot;fill&quot;:&quot;Navy&quot;,&quot;leading&quot;:{&quot;kind&quot;:&quot;points&quot;,&quot;value&quot;:19}}}' --cmd 'text.insert={&quot;text&quot;:&quot;係員のいる窓口へお進みください。&quot;,&quot;raw&quot;:true}' --cmd 'frame.create={&quot;rect&quot;:[40,680,555,744],&quot;content&quot;:&quot;text&quot;,&quot;caret&quot;:true}' --cmd 'type.char={&quot;attrs&quot;:{&quot;fontFamily&quot;:&quot;Noto Sans JP&quot;,&quot;fontStyle&quot;:&quot;Regular&quot;,&quot;size&quot;:13,&quot;fill&quot;:&quot;Navy&quot;,&quot;leading&quot;:{&quot;kind&quot;:&quot;points&quot;,&quot;value&quot;:19}}}' --cmd 'text.insert={&quot;text&quot;:&quot;顔画像や氏名が画面に表示されることはありません。ディスプレイには人型のみが映ります。認証はカメラから 2〜4 m の範囲で行います。&quot;,&quot;raw&quot;:true}' --cmd 'frame.create={&quot;rect&quot;:[40,770,555,806],&quot;content&quot;:&quot;text&quot;,&quot;caret&quot;:true}' --cmd 'type.char={&quot;attrs&quot;:{&quot;fontFamily&quot;:&quot;Noto Sans JP&quot;,&quot;fontStyle&quot;:&quot;Regular&quot;,&quot;size&quot;:10,&quot;fill&quot;:&quot;Teal&quot;,&quot;leading&quot;:{&quot;kind&quot;:&quot;points&quot;,&quot;value&quot;:15}}}' --cmd 'text.insert={&quot;text&quot;:&quot;このチラシは説明用の架空の案内です。実在の駅や事業者とは関係ありません。&quot;,&quot;raw&quot;:true}' --scale 1.4 --export design/flyer.png --export design/flyer.pdf --export design/flyer.designcraft">コピー</button></div><pre tabindex="0"><code>designcraft-cli run --cmd 'file.new={&quot;preset&quot;:&quot;A4&quot;,&quot;title&quot;:&quot;TOORU 利用案内&quot;,&quot;margins&quot;:36,&quot;bleed&quot;:9,&quot;primaryTextFrame&quot;:false}' --cmd 'swatch.create={&quot;name&quot;:&quot;Navy&quot;,&quot;color&quot;:&quot;#0F2A44&quot;}' … ほか 41 個の --cmd … --scale 1.4 --export design/flyer.png --export design/flyer.pdf --export design/flyer.designcraft</code></pre></div></div>
+</section>
+<section class="tool stage-doc" id="pdf" data-cat="document">
+  <header class="tool-head">
+    <span class="stop" aria-hidden="true">13</span>
+    <div><p class="eyebrow">文書の工程 / PDF 編集</p><h3>PdfCraft</h3></div>
+    <p class="ver">v0.19.0<br>ツール 195</p>
+  </header>
+  <div class="tool-body">
+    <div class="tool-text">
+      <h4>何ができるか</h4><p>PDF の結合、抽出、分割、文書情報の編集、テキスト抽出、偽の墨消しの検査などを行います。 Acrobat に近い位置づけのツールです。</p>
+      <h4>この案件で作ったもの</h4><p>仕様書、図面、試験表、チラシを 1 冊に結合した 4 ページの PDF。文書情報を書き込み、墨消しの検査も実行しました。</p>
+      <h4>対応形式</h4><p class="formats">読み書き: pdf　ページの書き出し: png / jpg / tif</p>
+      
+    </div>
+    <div class="tool-media"><div class="gallery tall"><figure><img src="assets/pdf-page-1.png" alt="1 ページ目" loading="lazy"><figcaption>1 ページ目</figcaption></figure><figure><img src="assets/pdf-page-2.png" alt="2 ページ目" loading="lazy"><figcaption>2 ページ目</figcaption></figure><figure><img src="assets/pdf-page-3.png" alt="3 ページ目" loading="lazy"><figcaption>3 ページ目</figcaption></figure><figure><img src="assets/pdf-page-4.png" alt="4 ページ目" loading="lazy"><figcaption>4 ページ目</figcaption></figure></div></div>
+  </div>
+  <div class="cmds"><h4>実際に実行したコマンド</h4><div class="cmd"><div class="cmd-head"><span>PDF を PNG に変換して掲載用画像にする</span><span class="cmd-meta">終了コード 0 / 77 ms</span><button type="button" class="copy" data-copy="pdfcraft-cli render grid/trial.pdf --page 1 --dpi 110 --out grid/trial.png">コピー</button></div><pre tabindex="0"><code>pdfcraft-cli render grid/trial.pdf --page 1 --dpi 110 --out grid/trial.png</code></pre></div><div class="cmd"><div class="cmd-head"><span>4 種類の PDF を 1 冊に結合する</span><span class="cmd-meta">終了コード 0 / 182 ms</span><button type="button" class="copy" data-copy="pdfcraft-cli combine word/spec.pdf cad/gate.pdf grid/trial.pdf design/flyer.pdf --out pdf/bundle-raw.pdf">コピー</button></div><pre tabindex="0"><code>pdfcraft-cli combine word/spec.pdf cad/gate.pdf grid/trial.pdf design/flyer.pdf --out pdf/bundle-raw.pdf</code></pre></div><div class="cmd"><div class="cmd-head"><span>文書情報を書き込む</span><span class="cmd-meta">終了コード 0 / 183 ms</span><button type="button" class="copy" data-copy="pdfcraft-cli edit pdf/bundle-raw.pdf --out pdf/tooru-bundle.pdf --title 'TOORU documents (fictional)' --author 'ArtCraft CLI demo'">コピー</button></div><pre tabindex="0"><code>pdfcraft-cli edit pdf/bundle-raw.pdf --out pdf/tooru-bundle.pdf --title 'TOORU documents (fictional)' --author 'ArtCraft CLI demo'</code></pre></div><div class="cmd"><div class="cmd-head"><span>ページ数などの情報を JSON で確認する</span><span class="cmd-meta">終了コード 0 / 31 ms</span><button type="button" class="copy" data-copy="pdfcraft-cli info pdf/tooru-bundle.pdf">コピー</button></div><pre tabindex="0"><code>pdfcraft-cli info pdf/tooru-bundle.pdf</code></pre></div></div>
+</section>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="common">
+  <div class="wrap">
+    <h2>どのツールにも共通する使い方</h2>
+    <div class="common">
+      <div><h3>拡張子で形式が決まる</h3><p>出力ファイルの拡張子を変えるだけで、書き出す形式を切り替えられます。</p></div>
+      <div><h3>コマンドは調べてから使う</h3><p><code>commands</code> で一覧を、<code>describe</code> で引数を確認できます。ツールによって名前が少し異なります。</p></div>
+      <div><h3>順番に実行して保存する</h3><p><code>run</code> は複数のコマンドを順に実行し、最後に保存や書き出しを行います。</p></div>
+      <div><h3>AI エージェントから使う</h3><p>多くのツールは <code>mcp</code> で MCP サーバーとして起動できます。</p></div>
+      <div><h3>上書きは止まる</h3><p>入力と同じファイルへの保存は原則拒否され、<code>--in-place</code> で許可します。</p></div>
+      <div><h3>PowerShell の引用符に注意</h3><p>JSON はシングルクォートで囲むか、スクリプトファイルに分けると安全です。</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="lessons">
+  <div class="wrap">
+    <h2>実行してわかった注意点</h2>
+    <p class="intro">各バージョンで今回確認した挙動です。</p>
+    <div class="table-scroll" style="margin-top:14px"><table>
+      <thead><tr><th scope="col">ツール</th><th scope="col">起きたこと</th><th scope="col">対処</th></tr></thead>
+      <tbody><tr><th scope="row">GridCraft</th><td>PDF 書き出しで日本語が空白になる</td><td>見出しを英語にして回避しました。xlsx の中では日本語を使えます。</td></tr><tr><th scope="row">DesignCraft</th><td>PDF/X-4 の検査が通らない</td><td>RGB の色と画像が残るためです。印刷入稿には CMYK への変換が必要です。</td></tr><tr><th scope="row">DesignCraft</th><td>枠を作った後の文字設定が本文に効かない</td><td>frame.create に caret: true を付け、type.char の後に text.insert で文字を入れます。</td></tr><tr><th scope="row">WordCraft</th><td>--save の 2 回指定で片方しか保存されない</td><td>変換を別々に実行します。エラーは出ません。</td></tr><tr><th scope="row">VectorCraft</th><td>色の指定が直前の図形にも効く</td><td>描く前に select.none で選択を解除します。線幅は stroke.set で指定します。</td></tr><tr><th scope="row">SoundCraft</th><td>mp3 に書き出せない</td><td>書き出せるのは wav、bwf、aiff、flac です。</td></tr></tbody>
+    </table></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><strong>このページは非公式の紹介ページです。</strong>ArtCraft の開発元が作成、監修したものではありません。</p>
+    <p>駅名、路線名、TOORU、仕様の数値、試験データはすべて架空です。実在の駅、事業者、製品とは関係ありません。文中の他社製品名は各社の商標で、機能の位置づけを説明する目的でのみ記載しています。</p>
+    <p>参考: <a href="https://getartcraft.com" rel="noopener">getartcraft.com</a> / <a href="https://discord.gg/artcraft" rel="noopener">Discord コミュニティ</a></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var video = document.getElementById('film');
+  document.querySelectorAll('.jump button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      video.currentTime = parseFloat(b.dataset.t) - 0.6;
+      var p = video.play(); if (p && p.catch) p.catch(function () {});
+    });
+  });
+  var chips = document.querySelectorAll('.chip');
+  chips.forEach(function (c) {
+    c.addEventListener('click', function () {
+      var f = c.dataset.filter;
+      chips.forEach(function (o) { o.setAttribute('aria-pressed', String(o === c)); });
+      document.querySelectorAll('.tool').forEach(function (s) { s.hidden = !(f === 'all' || s.dataset.cat === f); });
+      document.querySelectorAll('.line li').forEach(function (l) { l.classList.toggle('off', !(f === 'all' || l.dataset.cat === f)); });
+    });
+  });
+  document.querySelectorAll('.copy').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var done = function () { b.textContent = 'コピーしました'; setTimeout(function () { b.textContent = 'コピー'; }, 1500); };
+      var fallback = function () {
+        var r = document.createRange(); r.selectNodeContents(b.closest('.cmd').querySelector('code'));
+        var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = '選択しました';
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(b.dataset.copy).then(done, fallback); else fallback();
+    });
+  });
+})();
+</script>
+
+</html>
