@@ -4,7 +4,9 @@
 //  テスト手順 / 期待結果 / 実施結果 / 実施日 / 担当者 / 備考)に合わせている
 import fs from 'node:fs';
 import path from 'node:path';
-import { run, ROOT, publish, writeBuild } from './lib.mjs';
+import { spawn, spawnSync } from 'node:child_process';
+import { run, ROOT, BUILD, ASSETS, publish, writeBuild } from './lib.mjs';
+import { mcpSession } from './mcp-client.mjs';
 
 const tests = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'test-cases.json'), 'utf8'));
 const done = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'test-results.json'), 'utf8'));
@@ -52,6 +54,17 @@ c('range.setValues', { range: 'A3', values: functions });
 head('A3:D3'); grid('A3:D9');
 c('home.columnWidth', { cols: 'A:C', width: 110 });
 c('home.columnWidth', { cols: 'D:D', width: 330 });
+// 機能どうしのつながりを図形で描く(Excel の「挿入 > 図形」に当たる)
+section('F2', '機能の連携図');
+// 図形はすべて F4 を基準に置き、object.move の dx / dy(ポイント)で位置を決める。図形の id は挿入順の連番
+let shapeId = 0;
+const place = (p, x, y) => { c('insert.shape', { ...p, at: 'F4' }); c('object.move', { kind: 'shape', id: ++shapeId, at: 'F4', dx: x, dy: y }); };
+const BW = 110, BH = 34;
+const node = (x, y, text, fill) => place({ kind: 'roundedRectangle', width: BW, height: BH, text, fill }, x, y);
+const arrow = (x, y, width, height) => place({ kind: 'arrow', width, height }, x, y);
+node(0, 0, 'F-01 映像取得', '#0E8FB0'); node(160, 0, 'F-02 顔認証', '#0F2A44'); node(320, 0, 'F-03 結果表示', '#12A150');
+node(320, 70, 'F-04 音声通知', '#12A150'); node(160, 140, 'F-05 履歴記録', '#6E8496'); node(320, 140, 'F-06 履歴確認', '#6E8496');
+arrow(110, 17, 50, 0); arrow(270, 17, 50, 0); arrow(270, 34, 50, 53); arrow(215, 34, 0, 106); arrow(270, 157, 50, 0);
 
 c('home.insertSheet', { name: '画面項目定義' });
 title('認証履歴画面 項目定義(架空)');
@@ -113,9 +126,10 @@ head('A3:L3'); grid(`A3:L${last}`);
 c('home.wrapText', { range: `A4:L${last}`, on: true });
 c('home.alignTop', { range: `A4:L${last}` });
 c('data.validation', { range: `I${first}:I${last}`, type: 'list', formula1: 'OK,NG,保留,対象外,未実施', errorStyle: 'stop' });
-c('view.freezePanes', { cell: 'B4' });
+c('view.freezePanes', { cell: 'A4' });
 [['A', 56], ['B', 150], ['C', 130], ['D', 120], ['E', 230], ['F', 180], ['G', 230], ['H', 220], ['I', 70], ['J', 92], ['K', 70], ['L', 150]]
   .forEach(([k, w]) => c('home.columnWidth', { cols: `${k}:${k}`, width: w }));
+c('home.autofitRowHeight', { rows: `4:${last}` });
 c('sheet.activate', { sheet: SUM });
 
 const f = writeBuild('grid/book.txt', L.map(([id, p]) => `${id}=${JSON.stringify(p)}`).join('\n') + '\n');
@@ -123,11 +137,40 @@ run('grid', ['run', '--script', f, '--out', 'grid/tooru-design.xlsx', '--quiet']
 run('grid', ['cat', 'grid/tooru-design.xlsx', '--sheet', SUM, '--range', 'A22:B28'], { label: '別シートを数式で集計した実施状況を確認する', quiet: false });
 run('grid', ['convert', 'grid/tooru-design.xlsx', 'grid/spec-tests.html', '--sheet', CASES], { label: 'シートを HTML に変換する' });
 run('grid', ['convert', 'grid/tooru-design.xlsx', 'grid/spec-summary.html', '--sheet', SUM]);
-run('grid', ['convert', 'grid/tooru-design.xlsx', 'grid/spec-functions.html', '--sheet', '機能一覧']);
-run('grid', ['convert', 'grid/tooru-design.xlsx', 'grid/spec-items.html', '--sheet', '画面項目定義']);
 run('word', ['convert', 'grid/spec-summary.html', 'grid/spec-summary.pdf'], { label: 'GridCraft の HTML を日本語の PDF にする' });
 // テストケース一覧は 12 列あるので、A4 横向きにして列幅を割り振り、見出し行を各ページに繰り返す
 const widths = [38, 62, 62, 62, 92, 78, 92, 86, 42, 58, 42, 56].flatMap((w) => ['--cmd', `table.columnWidth={"width":${w}}`, '--cmd', 'text.tab={}']);
 run('word', ['run', '--file', 'grid/spec-tests.html', '--cmd', 'layout.orientation={"value":"landscape"}', '--cmd', 'layout.margins={"top":30,"bottom":30,"left":36,"right":36}',
   '--cmd', 'table.deleteRow={}', '--cmd', 'table.deleteRow={}', '--cmd', 'table.repeatHeader={}', ...widths, '--save', 'grid/spec-tests.pdf'], { label: 'テストケース一覧を A4 横の PDF に組む' });
 publish('grid/tooru-design.xlsx', 'grid-tooru-design.xlsx');
+
+// 各シートの画面を撮る。CLI だけでは画面画像を作れないため、デスクトップアプリを --control で起動し、
+// gridcraft-cli mcp --connect 経由で screenshot ツールを呼ぶ
+const APP = 'C:/Program Files/GridCraft/gridcraft.exe', CLI = 'C:/Program Files/GridCraft/gridcraft-cli.exe', PORT = '7979';
+const book = path.join(BUILD, 'grid', 'tooru-design.xlsx');
+const app = spawn(APP, ['--control', PORT, book], { detached: true, stdio: 'ignore' });
+app.unref();
+const shots = [['結合試験仕様書', 'grid-cases.png'], ['結合試験_概要', 'grid-summary.png'], ['画面項目定義', 'grid-items.png'], ['機能一覧', 'grid-functions.png']];
+try {
+  let ready = false;
+  for (let i = 0; i < 40 && !ready; i++) {
+    await new Promise((r) => setTimeout(r, 500));
+    try { await mcpSession(CLI, ['mcp', '--connect', PORT], [['list_windows', {}]]); ready = true; } catch {}
+  }
+  if (!ready) throw new Error('GridCraft app did not start');
+  const calls = shots.flatMap(([sheet, file]) => [
+    ['select', { range: `'${sheet}'!A1` }],
+    ['execute_command', { command: 'view.zoom', params: { percent: 100 } }],
+    ['screenshot', { path: path.join(BUILD, 'grid', file).split(path.sep).join('/') }],
+  ]);
+  await mcpSession(CLI, ['mcp', '--connect', PORT], calls);
+  console.log(`[grid] app screenshots: ${shots.length}`);
+} finally {
+  spawnSync('taskkill', ['/PID', String(app.pid), '/T', '/F']);
+}
+// PNG のままだと 4 枚で 3 MB を超えるので、文字がにじまない可逆の WebP にする
+shots.forEach(([, file], i) => {
+  const webp = file.replace('.png', '.webp');
+  run('photo', ['convert', `grid/${file}`, `grid/${webp}`], { label: i === 0 ? '画面のスクリーンショットを WebP にする' : undefined });
+  publish(`grid/${webp}`, webp);
+});
