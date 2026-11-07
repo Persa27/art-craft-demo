@@ -23,3 +23,24 @@ run('fig', ['run', f, '--out', 'fig/layout.figcraft'], { label: '画面レイア
 run('fig', ['render', 'fig/layout.figcraft', '--out', 'fig/layout.png', '--scale', '0.5'], { label: 'レイアウトを PNG に書き出す' });
 run('fig', ['convert', 'fig/layout.figcraft', 'fig/layout.svg'], { label: 'SVG に変換する' });
 publish('fig/layout.png', 'fig-layout.png');
+
+// 認証履歴画面のワイヤーフレーム(1440x900)
+const W = [];
+const w = (command, params) => W.push({ command, params });
+const rect = (x, y, width, height, name, fill = '#FFFFFF', stroke = '#C9D6DC') => w('node.create', { type: 'rectangle', x, y, width, height, name, props: { fill, stroke, strokeWeight: 2, cornerRadius: 6 } });
+const tx = (x, y, text, size = 22, color = '#11222F') => w('text.create', { text, x, y, props: { fontFamily: 'Noto Sans JP', fontSize: size, fill: color } });
+w('frame.create', { x: 0, y: 0, width: 1440, height: 900, name: 'History screen', props: { fill: '#F2F6F7' } });
+rect(0, 0, 1440, 72, 'header', '#0F2A44', '#0F2A44'); tx(32, 18, '認証履歴', 30, '#FFFFFF');
+['認証件数', '認証 OK 率', 'NG 件数', '平均応答時間'].forEach((t, i) => { rect(32 + i * 228, 96, 212, 96, `kpi-${i}`); tx(50 + i * 228, 112, t, 18, '#52646F'); tx(50 + i * 228, 140, '000', 28); });
+rect(944, 96, 464, 96, 'note', '#E8F1F5'); tx(962, 124, '集計は絞り込みに連動する', 20, '#52646F');
+rect(32, 208, 1376, 150, 'chart'); tx(50, 222, '時間帯別の認証件数', 20, '#52646F');
+for (let i = 0; i < 17; i++) rect(70 + i * 78, 340 - (20 + (i * 37) % 70), 40, 20 + (i * 37) % 70, `bar-${i}`, '#0D7BA3', '#0D7BA3');
+rect(32, 374, 900, 56, 'filters'); tx(50, 388, '結果 / 改札 / キーワード', 20, '#52646F');
+rect(32, 446, 900, 420, 'table'); tx(50, 462, '時刻 / 改札 / 匿名 ID / 距離 / 結果', 20, '#52646F');
+for (let i = 1; i < 8; i++) rect(50, 462 + i * 48, 864, 2, `row-${i}`, '#C9D6DC', '#C9D6DC');
+rect(948, 374, 460, 492, 'detail'); tx(966, 390, '詳細: 人型の位置と判定', 20, '#52646F');
+rect(966, 430, 424, 238, 'position', '#20303F', '#20303F'); tx(1090, 536, 'カメラ座標の人型', 22, '#FFFFFF');
+const hf = writeBuild('fig/history.json', JSON.stringify(W));
+run('fig', ['run', hf, '--out', 'fig/history.figcraft'], { label: '認証履歴画面のワイヤーフレームを組む' });
+run('fig', ['render', 'fig/history.figcraft', '--out', 'fig/history.png', '--scale', '0.6']);
+publish('fig/history.png', 'fig-history.png');

@@ -48,4 +48,5 @@ for (let d = 2; d < far; d += 1) s.push({ command: 'shape.line', params: { x1: P
 s.push(...stroke('#35D07F', 6), poly([P(-W, spec.auth_near_m, 0), P(W, spec.auth_near_m, 0), P(W, spec.auth_far_m, 0), P(-W, spec.auth_far_m, 0)]), { command: 'stroke.set', params: { weight: 6 } });
 const cam = writeBuild('vector/camera-view.jsonl', steps(s));
 run('vector', ['run', '--commands', cam, '--export', 'vector/camera-view.png', '--scale', '1'], { label: 'カメラ視点の通路図を座標から描く' });
+publish('vector/camera-view.png', 'vector-camera-view.png');
 for (const f of ['logo.png', 'logo.svg', 'person-ok.svg', 'person-ng.svg', 'person-none.svg', 'mark-ok.svg', 'mark-ng.svg']) publish('vector/' + f, 'vector-' + f);

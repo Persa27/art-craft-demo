@@ -36,6 +36,12 @@ function media(m, t) {
   if (m.type === 'gallery') return `<div class="gallery${m.tall ? ' tall' : ''}">${m.items.map(([f, c]) => `<figure><img src="${a(f)}" alt="${esc(c)}" loading="lazy"><figcaption>${esc(c)}</figcaption></figure>`).join('')}</div>`;
   if (m.type === 'pair') return `<div class="pair">${m.items.map(([f, c]) => `<figure><img src="${a(f)}" alt="${esc(c)}" loading="lazy"><figcaption>${esc(c)}</figcaption></figure>`).join('')}</div>`;
   if (m.type === 'row') return `<div class="row${m.dark ? ' dark' : ''}">${m.items.map(([f, c]) => `<figure><img src="${a(f)}" alt="${esc(c)}" loading="lazy"><figcaption>${esc(c)}</figcaption></figure>`).join('')}</div>`;
+  if (m.type === 'video') return `<figure class="clip"><video controls playsinline preload="metadata" poster="${a(m.poster)}" src="${a(m.src)}" aria-label="${esc(m.label)}"></video><figcaption>${esc(m.label)} / <a href="${a(m.src)}">動画ファイルを直接開く</a></figcaption></figure>`;
+  if (m.type === 'sheets') return m.items.map(([f, c]) => {
+    const html = fs.readFileSync(path.join(BUILD, 'grid', f + '.html'), 'utf8');
+    const table = html.slice(html.indexOf('<table>'), html.indexOf('</table>') + 8).replace(/<tr>(<td style="text-align:left;"><\/td>)+<\/tr>/g, '');
+    return `<figure class="sheet"><figcaption>シート「${esc(c)}」(gridcraft-cli の HTML 出力)</figcaption><div class="sheet-scroll" tabindex="0">${table}</div></figure>`;
+  }).join('');
   if (m.type === 'audio') return `<div class="sounds">${m.items.map(([f, c, d]) => `<div class="sound"><strong>${esc(c)}</strong><span>${esc(d)}</span><audio controls preload="none" src="${a(f)}"></audio></div>`).join('')}</div>`;
   return '';
 }
@@ -53,7 +59,7 @@ function toolSection(t, i) {
     <div><p class="eyebrow">${st.name}の工程 / ${esc(t.kind)}</p><h3>${esc(t.name)}</h3></div>
     <p class="ver">v${t.version}<br>${t.cmdsLabel || 'コマンド'} ${t.cmds}</p>
   </header>
-  <div class="tool-body">
+  <div class="tool-body${t.wide ? ' wide' : ''}">
     <div class="tool-text">
       <h4>何ができるか</h4><p>${esc(t.what)} ${esc(t.near)} に近い位置づけのツールです。</p>
       <h4>この案件で作ったもの</h4><p>${esc(t.made)}</p>
@@ -81,6 +87,7 @@ const page = tpl
   .replace('{{ROUTE}}', route).replace('{{LEGEND}}', stageLegend).replace('{{CHIPS}}', chips)
   .replace('{{TOOLS}}', tools.map(toolSection).join('\n'))
   .replace('{{LESSONS}}', lessons.map(([a, b, c]) => `<tr><th scope="row">${esc(a)}</th><td>${esc(b)}</td><td>${esc(c)}</td></tr>`).join(''))
+  .replace('{{HISTORY}}', fs.readFileSync(path.join(ROOT, 'data', 'history.json'), 'utf8'))
   .replaceAll('{{GUIDE}}', guide)
   .replaceAll('{{T_OK}}', A.tAuth.toFixed(1)).replaceAll('{{T_NG}}', B.tAuth.toFixed(1))
   .replaceAll('{{X}}', Math.round(kA.x)).replaceAll('{{D}}', kA.d_m)

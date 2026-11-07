@@ -111,7 +111,7 @@ td.num { font-variant-numeric: tabular-nums; }
 .note { margin-top: 16px; padding: 9px 12px; background: var(--note-bg); font-size: 14px; line-height: 1.7; }
 .note.warn { background: var(--warn-bg); color: var(--warn-ink); }
 .note strong { margin-right: 6px; }
-.tool-media { min-width: 0; display: grid; gap: 14px; }
+.tool-media { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
 .shot { margin: 0; border: 1px solid var(--rule); background: #fff; }
 .shot.plain { border: 0; background: #fff; padding: 14px 18px; }
 .shot.plain img { max-width: 420px; width: 100%; }
@@ -119,7 +119,7 @@ td.num { font-variant-numeric: tabular-nums; }
 .shot.crop { overflow: hidden; }
 .shot.crop img { width: 100%; clip-path: inset(5% 30% 40% 7%); margin-bottom: -38%; transform: scale(1.0); }
 .gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.gallery.tall { grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: end; }
+.gallery.tall { grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: end; }
 .gallery figure, .pair figure, .row figure { margin: 0; min-width: 0; }
 .gallery img { border: 1px solid var(--rule); background: #fff; }
 .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
@@ -132,7 +132,7 @@ td.num { font-variant-numeric: tabular-nums; }
 .sound { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--rule); }
 .sound span { font-size: 14px; color: var(--muted); }
 .sound audio { width: 100%; margin-top: 6px; }
-.cmds { margin-top: 22px; display: grid; gap: 10px; }
+.cmds { margin-top: 22px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
 .cmds h4 { margin-top: 0; }
 .cmd { background: var(--term); color: var(--term-ink); min-width: 0; border-radius: 4px; }
 .cmd-head { display: flex; flex-wrap: wrap; gap: 2px 12px; align-items: center; padding: 8px 12px 0; font-size: 13px; }
@@ -142,6 +142,62 @@ td.num { font-variant-numeric: tabular-nums; }
 .copy:hover { border-color: var(--term-ink); }
 .cmd pre { margin: 0; padding: 6px 12px 11px; overflow-x: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.6; }
 .cmd code { white-space: pre-wrap; overflow-wrap: anywhere; font-family: inherit; }
+
+.clip { margin: 0; }
+.clip video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #0b1f33; }
+.clip figcaption, .sheet figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.direct { margin-top: 6px; font-size: 13px; color: var(--muted); }
+.tool-body.wide { grid-template-columns: minmax(0, 1fr); }
+.tool-body.wide .tool-text { max-width: 46em; }
+.sheet { margin: 0; min-width: 0; }
+.sheet figcaption { margin: 0 0 6px; }
+.sheet-scroll { overflow: auto; max-height: 430px; background: #fff; color: #11222f; border: 1px solid var(--rule); }
+.sheet-scroll table { font-size: 14px; width: auto; min-width: 100%; }
+.sheet-scroll td { border: 1px solid #d4dde1; padding: 4px 8px; white-space: nowrap; vertical-align: middle; }
+
+/* 認証履歴画面 */
+.window { margin-top: 22px; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.window-bar { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--note-bg); border-bottom: 1px solid var(--rule); }
+.window-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--rule); flex: none; }
+.address { flex: 1; min-width: 0; font-family: var(--mono); font-size: 12px; color: var(--muted); background: var(--surface); border-radius: 4px; padding: 3px 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app { padding: 18px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 24px; }
+.kpi span { display: block; font-size: 13px; color: var(--muted); }
+.kpi b { font-size: 28px; font-weight: 900; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.chart { position: relative; }
+.chart h3 { font-size: 14px; font-weight: 700; }
+.chart svg { display: block; width: 100%; height: auto; margin-top: 4px; }
+.chart text { fill: var(--muted); font-size: 11px; font-family: var(--font); }
+.chart .gridline { stroke: var(--rule); stroke-width: 1; }
+.chart .bar { fill: var(--design); }
+.chart .hit { fill: transparent; }
+.chart .hit:hover + .bar, .chart .bar.on { opacity: .75; }
+.tip { position: absolute; pointer-events: none; background: var(--term); color: var(--term-ink); font-size: 12px; padding: 3px 8px; border-radius: 3px; transform: translate(-50%, -100%); white-space: nowrap; }
+.filters { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; }
+.filters label { display: grid; gap: 2px; font-size: 13px; color: var(--muted); }
+.filters select, .filters input { font: inherit; font-size: 15px; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 4px 8px; min-width: 0; }
+.count { margin-left: auto; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.split { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 20px; align-items: start; }
+.history { font-size: 14px; font-variant-numeric: tabular-nums; }
+.history th, .history td { padding: 6px 10px 6px 0; white-space: nowrap; }
+.history tbody tr { cursor: pointer; }
+.history tbody tr:hover, .history tbody tr[aria-selected="true"] { background: var(--note-bg); }
+.history td:first-child, .history th:first-child { padding-left: 8px; }
+.sort { font: inherit; font-size: 13px; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+.res { display: inline-flex; align-items: center; gap: 5px; font-weight: 700; }
+.res i { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 12px; color: #fff; }
+.res.ok i { background: #12a150; } .res.ng i { background: #d92d20; } .res.none i { background: #6f7d8b; }
+.tag { font-size: 11px; font-weight: 700; border: 1px solid var(--rule); border-radius: 3px; padding: 0 4px; margin-left: 6px; }
+.pager { display: flex; align-items: center; gap: 10px; margin-top: 10px; font-size: 14px; }
+.pager button, .scene { font: inherit; font-size: 14px; font-weight: 700; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 3px 12px; cursor: pointer; }
+.pager button:disabled { opacity: .4; cursor: default; }
+.detail h3 { font-size: 16px; font-weight: 900; }
+.pos { position: relative; aspect-ratio: 16 / 9; margin-top: 8px; overflow: hidden; background: #20303f url(assets/vector-camera-view.png) center / cover; }
+.pos img { position: absolute; max-width: none; transform: translate(-50%, -50%); }
+.detail dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 14px; margin: 10px 0 0; font-size: 14px; }
+.detail dt { color: var(--muted); }
+.detail dd { margin: 0; font-variant-numeric: tabular-nums; }
+.scene { margin-top: 10px; }
 
 /* 共通 */
 .common { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px 32px; margin-top: 22px; }
@@ -153,6 +209,8 @@ footer p + p { margin-top: 8px; }
 footer strong { color: var(--ink); }
 
 @media (max-width: 860px) {
+  .split { grid-template-columns: minmax(0, 1fr); }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hero, .brief, .tool-body { grid-template-columns: minmax(0, 1fr); }
   .hero { gap: 26px; padding-block: 28px 30px; }
   .common { grid-template-columns: minmax(0, 1fr); }
@@ -185,6 +243,7 @@ footer strong { color: var(--ink); }
       <button type="button" data-t="{{T_NG}}">認証 NG {{T_NG}} 秒</button>
       <button type="button" data-t="11">未判定 11 秒</button>
     </p>
+    <p class="direct"><a href="assets/film-tooru-display.mp4">動画ファイルを直接開く</a> / <a href="#history">認証履歴画面へ</a></p>
   </div>
 </div>
 
@@ -235,10 +294,40 @@ footer strong { color: var(--ink); }
   </div>
 </section>
 
+<section class="block" id="history">
+  <div class="wrap">
+    <h2>認証履歴の確認画面</h2>
+    <p class="intro">駅係員がブラウザで見る想定の画面です。下の画面はそのまま操作できます。データは架空の 240 件で、最新の 3 件は完成動画の人物 A、B、C です。履歴には匿名 ID だけを持たせ、顔画像と氏名は記録しません。設計は FigCraft と GridCraft で行い、画面そのものは HTML と JavaScript で実装しています。</p>
+    <div class="window">
+      <div class="window-bar"><i></i><i></i><i></i><span class="address">tooru-admin.example/history(架空)</span></div>
+      <div class="app">
+        <div class="kpis" id="h-kpis"></div>
+        <div class="chart" id="h-chart"><h3>時間帯別の認証件数</h3><svg viewBox="0 0 720 150" role="img" aria-label="時間帯別の認証件数の棒グラフ"></svg><div class="tip" hidden></div></div>
+        <div class="filters">
+          <label>結果<select id="h-result"><option value="">すべて</option><option value="ok">OK</option><option value="ng">NG</option><option value="none">未判定</option></select></label>
+          <label>改札<select id="h-gate"><option value="">すべて</option><option value="1">1 番</option><option value="2">2 番</option><option value="3">3 番</option></select></label>
+          <label>キーワード<input id="h-q" type="search" placeholder="E-0240 / G-1A2B"></label>
+          <span class="count" id="h-count" aria-live="polite"></span>
+        </div>
+        <div class="split">
+          <div>
+            <div class="table-scroll"><table class="history">
+              <thead><tr><th scope="col" aria-sort="descending"><button type="button" class="sort" data-sort="time">時刻</button></th><th scope="col">改札</th><th scope="col">匿名 ID</th><th scope="col"><button type="button" class="sort" data-sort="d">距離</button></th><th scope="col">結果</th></tr></thead>
+              <tbody id="h-rows"></tbody>
+            </table></div>
+            <div class="pager"><button type="button" id="h-prev">前へ</button><span id="h-page"></span><button type="button" id="h-next">次へ</button></div>
+          </div>
+          <div class="detail" id="h-detail" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="block" id="tools" style="padding-bottom:0">
   <div class="wrap">
     <h2 class="big">13 ツールの実演</h2>
-    <p class="intro" style="margin-bottom:26px">画像、音声、動画はすべて CLI の実出力です。掲載したコマンドは、終了コード 0 で成功したものだけです。作業フォルダは <code>build/</code> で、長いコマンドは途中を省略して表示しています。コピーすると全文を取得できます。</p>
+    <p class="intro" style="margin-bottom:26px">ここに載せた画像、音声、動画はすべて CLI の実出力です。掲載したコマンドは、終了コード 0 で成功したものだけです。作業フォルダは <code>build/</code> で、長いコマンドは途中を省略して表示しています。コピーすると全文を取得できます。</p>
     <div id="tool-list">
 {{TOOLS}}
     </div>
@@ -281,29 +370,108 @@ footer strong { color: var(--ink); }
 <script>
 (function () {
   var video = document.getElementById('film');
-  // 配信先が Range リクエストに対応しないため、動画全体を取得してシークできるようにする
-  var ready = fetch(video.currentSrc || video.src).then(function (r) {
-    if (!r.ok) throw new Error('video');
-    return r.blob();
-  }).then(function (blob) {
-    var t = video.currentTime, playing = !video.paused;
-    video.src = URL.createObjectURL(blob);
-    return new Promise(function (done) {
-      video.addEventListener('loadedmetadata', function () {
-        video.currentTime = t;
-        if (playing) video.play().catch(function () {});
-        done();
-      }, { once: true });
-    });
-  }).catch(function () {});
   document.querySelectorAll('.jump button').forEach(function (b) {
     b.addEventListener('click', function () {
-      ready.then(function () {
-        video.currentTime = parseFloat(b.dataset.t) - 0.6;
-        var p = video.play(); if (p && p.catch) p.catch(function () {});
-      });
+      video.currentTime = parseFloat(b.dataset.t) - 0.6;
+      var p = video.play(); if (p && p.catch) p.catch(function () {});
     });
   });
+  // 認証履歴画面
+  var HISTORY = {{HISTORY}};
+  var LABEL = { ok: 'OK', ng: 'NG', none: '未判定' }, MARK = { ok: '✓', ng: '×', none: '–' };
+  var state = { result: '', gate: '', q: '', sort: 'time', dir: -1, page: 0, sel: HISTORY[HISTORY.length - 3].id };
+  var PER = 20, $ = function (id) { return document.getElementById(id); };
+  var res = function (r) { return '<span class="res ' + r + '"><i aria-hidden="true">' + MARK[r] + '</i>' + LABEL[r] + '</span>'; };
+  function filtered() {
+    var q = state.q.trim().toLowerCase();
+    return HISTORY.filter(function (e) {
+      return (!state.result || e.result === state.result) && (!state.gate || String(e.gate) === state.gate) &&
+        (!q || e.id.toLowerCase().indexOf(q) >= 0 || e.anon.toLowerCase().indexOf(q) >= 0);
+    }).sort(function (a, b) {
+      var x = a[state.sort], y = b[state.sort];
+      return (x < y ? -1 : x > y ? 1 : 0) * state.dir || (a.id < b.id ? 1 : -1);
+    });
+  }
+  function kpis(list) {
+    var ok = list.filter(function (e) { return e.result === 'ok'; }).length, ng = list.filter(function (e) { return e.result === 'ng'; }).length;
+    var ms = list.filter(function (e) { return e.ms; });
+    var avg = ms.length ? Math.round(ms.reduce(function (s, e) { return s + e.ms; }, 0) / ms.length) : null;
+    var cells = [['認証件数', list.length + ' 件'], ['認証 OK 率', ok + ng ? (ok / (ok + ng) * 100).toFixed(1) + '%' : '–'], ['NG 件数', ng + ' 件'], ['平均応答時間', avg === null ? '–' : avg + ' ms']];
+    $('h-kpis').innerHTML = cells.map(function (c) { return '<div class="kpi"><span>' + c[0] + '</span><b>' + c[1] + '</b></div>'; }).join('');
+  }
+  function chart(list) {
+    var box = $('h-chart'), svg = box.querySelector('svg'), tip = box.querySelector('.tip');
+    var from = 6, to = 22, n = to - from + 1, counts = [];
+    for (var i = 0; i < n; i++) counts.push(0);
+    list.forEach(function (e) { var h = parseInt(e.time, 10) - from; if (h >= 0 && h < n) counts[h]++; });
+    var max = Math.max(4, Math.ceil(Math.max.apply(null, counts) / 4) * 4), L = 26, B = 128, T = 8, W = 720 - L, step = W / n, bw = Math.min(22, step - 6);
+    var y = function (v) { return B - (B - T) * v / max; }, out = '';
+    [0, max / 2, max].forEach(function (v) { out += '<line class="gridline" x1="' + L + '" x2="720" y1="' + y(v) + '" y2="' + y(v) + '"></line><text x="' + (L - 6) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + v + '</text>'; });
+    counts.forEach(function (c, i) {
+      var x = L + i * step + (step - bw) / 2, h = B - y(c);
+      out += '<rect class="hit" data-i="' + i + '" x="' + (L + i * step) + '" y="' + T + '" width="' + step + '" height="' + (B - T) + '"></rect>';
+      if (c) out += '<path class="bar" d="M' + x + ' ' + B + 'v' + (-(h - Math.min(4, h))) + 'q0 ' + (-Math.min(4, h)) + ' 4 ' + (-Math.min(4, h)) + 'h' + (bw - 8) + 'q4 0 4 ' + Math.min(4, h) + 'v' + (h - Math.min(4, h)) + 'z"></path>';
+      else out += '<g></g>';
+      if (i % 2 === 0) out += '<text x="' + (L + i * step + step / 2) + '" y="145" text-anchor="middle">' + (from + i) + '時</text>';
+    });
+    svg.innerHTML = out;
+    svg.querySelectorAll('.hit').forEach(function (r) {
+      r.addEventListener('mouseenter', function () {
+        var i = +r.dataset.i, sc = svg.getBoundingClientRect().width / 720;
+        tip.textContent = (from + i) + '時台 ' + counts[i] + ' 件';
+        tip.style.left = (L + i * step + step / 2) * sc + 'px'; tip.style.top = (y(counts[i]) * sc + 16) + 'px'; tip.hidden = false;
+      });
+      r.addEventListener('mouseleave', function () { tip.hidden = true; });
+    });
+  }
+  function detail() {
+    var e = HISTORY.filter(function (x) { return x.id === state.sel; })[0], box = $('h-detail');
+    if (!e) { box.innerHTML = ''; return; }
+    var s = e.h / 1000, img = 'assets/photo-person-' + e.result + '.png';
+    var left = e.x / 19.2, top = (e.y - 100 * s) / 10.8, height = 1200 * s / 10.8;
+    box.innerHTML = '<h3>' + e.id + ' の詳細</h3><div class="pos"><img src="' + img + '" alt="カメラ座標 x ' + e.x + ' の人型" style="left:' + left + '%;top:' + top + '%;height:' + height + '%"></div>' +
+      '<dl><dt>結果</dt><dd>' + res(e.result) + (e.reason ? '(' + e.reason + ')' : '') + '</dd><dt>時刻</dt><dd>' + e.time + '</dd><dt>改札</dt><dd>' + e.gate + ' 番</dd><dt>匿名 ID</dt><dd>' + e.anon + '</dd><dt>距離</dt><dd>' + e.d.toFixed(2) + ' m</dd><dt>座標</dt><dd>x ' + e.x + ' / y ' + e.y + ' px</dd><dt>応答時間</dt><dd>' + (e.ms ? e.ms + ' ms' : '–') + '</dd></dl>' +
+      (e.scene !== undefined ? '<button type="button" class="scene" data-t="' + e.scene + '">完成動画で人物 ' + e.person + ' の場面を再生</button>' : '');
+    var b = box.querySelector('.scene');
+    if (b) b.addEventListener('click', function () {
+      video.scrollIntoView({ block: 'center' });
+      video.currentTime = Math.max(0, parseFloat(b.dataset.t) - 0.6);
+      var p = video.play(); if (p && p.catch) p.catch(function () {});
+    });
+  }
+  function render() {
+    var list = filtered(), pages = Math.max(1, Math.ceil(list.length / PER));
+    if (state.page >= pages) state.page = pages - 1;
+    kpis(list); chart(list);
+    $('h-count').textContent = list.length + ' 件を表示中';
+    $('h-page').textContent = (state.page + 1) + ' / ' + pages + ' ページ';
+    $('h-prev').disabled = state.page === 0; $('h-next').disabled = state.page >= pages - 1;
+    $('h-rows').innerHTML = list.slice(state.page * PER, state.page * PER + PER).map(function (e) {
+      return '<tr tabindex="0" data-id="' + e.id + '" aria-selected="' + (e.id === state.sel) + '"><td>' + e.time + (e.person ? '<span class="tag">人物 ' + e.person + '</span>' : '') + '</td><td>' + e.gate + ' 番</td><td>' + e.anon + '</td><td>' + e.d.toFixed(2) + ' m</td><td>' + res(e.result) + '</td></tr>';
+    }).join('') || '<tr><td colspan="5">該当する履歴はありません。条件を変えてください。</td></tr>';
+    document.querySelectorAll('.history thead th').forEach(function (th) {
+      var b = th.querySelector('.sort');
+      if (!b) return;
+      if (b.dataset.sort === state.sort) th.setAttribute('aria-sort', state.dir > 0 ? 'ascending' : 'descending'); else th.removeAttribute('aria-sort');
+    });
+    detail();
+  }
+  $('h-result').addEventListener('change', function (e) { state.result = e.target.value; state.page = 0; render(); });
+  $('h-gate').addEventListener('change', function (e) { state.gate = e.target.value; state.page = 0; render(); });
+  $('h-q').addEventListener('input', function (e) { state.q = e.target.value; state.page = 0; render(); });
+  $('h-prev').addEventListener('click', function () { state.page--; render(); });
+  $('h-next').addEventListener('click', function () { state.page++; render(); });
+  document.querySelectorAll('.sort').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (state.sort === b.dataset.sort) state.dir = -state.dir; else { state.sort = b.dataset.sort; state.dir = b.dataset.sort === 'd' ? 1 : -1; }
+      state.page = 0; render();
+    });
+  });
+  var pick = function (ev) { var tr = ev.target.closest('tr[data-id]'); if (tr) { state.sel = tr.dataset.id; render(); } };
+  $('h-rows').addEventListener('click', pick);
+  $('h-rows').addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); pick(ev); } });
+  render();
+
   var chips = document.querySelectorAll('.chip');
   chips.forEach(function (c) {
     c.addEventListener('click', function () {

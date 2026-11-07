@@ -5,9 +5,10 @@ ArtCraft 系の 13 個のヘッドレス CLI でできることを紹介する�
 
 ## 構成
 
-- `data/`: 仕様書の原稿と、シナリオ(`scenario.json`、生成物)
+- `data/`: 仕様書の原稿、テスト項目と結果、シナリオと認証履歴(`scenario.json`、`history.json` は生成物)
 - `scripts/`: ツールごとの生成スクリプトとサイトのテンプレート
 - `site/`: 公開するサイト(`index.html` と `assets/`)
+- `src/worker.js`: 動画と音声に Range リクエストを返す Cloudflare Worker
 - `build/`: 中間生成物(git の管理外)
 
 ## 再生成
