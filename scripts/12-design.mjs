@@ -9,12 +9,12 @@ cmd('file.new', { preset: 'A4', title: 'TOORU 利用案内', margins: 36, bleed:
 cmd('swatch.create', { name: 'Navy', color: '#0F2A44' }); cmd('swatch.create', { name: 'Teal', color: '#0E8FB0' }); cmd('swatch.create', { name: 'OK', color: '#12A150' }); cmd('swatch.create', { name: 'NG', color: '#D92D20' }); cmd('swatch.create', { name: 'Mist', color: '#E8F1F5' });
 panel([0, 0, 595, 250], 'Navy');
 text([40, 44, 555, 86], 'あさなぎ線 ひかり台駅', 20, 'Medium', 'Mist');
-text([40, 88, 555, 170], '顔で通れる改札を試します', 40, 'Bold', '[Paper]');
-text([40, 180, 555, 236], '実証実験にご協力ください。登録された方は、改札の手前を普通に歩くだけで認証されます。', 15, 'Regular', 'Mist');
-cmd('file.place', { path: abs('photo/camera-frame.png'), x: 40, y: 272, width: 515 });
-const steps = [['OK', '緑の人型とチェック印', 'そのままお通りください。'], ['NG', '赤の人型とバツ印', '係員のいる窓口へお進みください。']];
+text([40, 88, 555, 170], 'タッチもゲートもない改札', 40, 'Bold', '[Paper]');
+text([40, 180, 555, 236], '登録された方は、通路を普通に歩くだけで通過できます。立ち止まる必要はありません。', 15, 'Regular', 'Mist');
+cmd('file.place', { path: abs('photo/monitor-frame.png'), x: 40, y: 272, width: 515 });
+const steps = [['OK', '明るい音と緑の表示', 'そのままお通りください。'], ['NG', '低い音と赤の表示', '近くの係員にお声がけください。']];
 steps.forEach(([sw, a, b], i) => { const x = 40 + i * 265; panel([x, 572, x + 250, 580], sw); text([x, 590, x + 250, 620], a, 17, 'Bold', 'Navy'); text([x, 622, x + 250, 660], b, 13, 'Regular', 'Navy'); });
-text([40, 680, 555, 744], '顔画像や氏名が画面に表示されることはありません。ディスプレイには人型のみが映ります。認証はカメラから 2〜4 m の範囲で行います。', 13, 'Regular', 'Navy');
+text([40, 680, 555, 744], '画面に顔画像や氏名が表示されることはありません。ゲートがないため、車椅子の方や大きな荷物をお持ちの方も通りやすい通路です。', 13, 'Regular', 'Navy');
 text([40, 770, 555, 806], 'このチラシは説明用の架空の案内です。実在の駅や事業者とは関係ありません。', 10, 'Regular', 'Teal');
 run('design', ['run', ...c, '--scale', '1.4', '--export', 'design/flyer.png', '--export', 'design/flyer.pdf', '--export', 'design/flyer.designcraft'], { label: 'A4 チラシを組版して PNG と PDF に書き出す' });
 publish('design/flyer.png', 'design-flyer.png');

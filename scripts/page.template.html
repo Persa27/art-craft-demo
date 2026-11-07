@@ -44,13 +44,8 @@ h1 { font-size: clamp(34px, 5vw, 54px); font-weight: 900; margin-top: 10px; lett
 .lead { margin-top: 18px; font-size: 17px; max-width: 34em; }
 .facts { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 8px 26px; font-size: 14px; color: var(--muted); }
 .facts b { display: block; font-size: 26px; line-height: 1.2; color: var(--ink); font-weight: 900; font-variant-numeric: tabular-nums; }
-.ceiling { height: 12px; background: var(--rule); border-radius: 2px; }
-.rods { display: flex; justify-content: space-around; padding-inline: 18%; }
-.rods i { width: 6px; height: 30px; background: var(--muted); }
-.bezel { background: #0a141b; padding: 10px 10px 8px; border-radius: 6px; position: relative; }
+.bezel { background: #0a141b; padding: 10px; border-radius: 6px; position: relative; }
 .bezel video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #0b1f33; }
-.cam { display: flex; align-items: center; justify-content: center; gap: 6px; height: 16px; color: #8fa6b2; font-size: 10px; letter-spacing: .12em; }
-.cam i { width: 8px; height: 8px; border-radius: 50%; background: #27b7d6; }
 .jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; font-size: 14px; color: var(--muted); }
 .jump button { font: inherit; font-weight: 700; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 4px 10px; cursor: pointer; }
 .jump button:hover { border-color: var(--ink); }
@@ -88,13 +83,7 @@ thead th { font-size: 13px; color: var(--muted); font-weight: 500; }
 tbody th { font-weight: 700; white-space: nowrap; }
 td.num { font-variant-numeric: tabular-nums; }
 .table-scroll { overflow-x: auto; }
-.same { margin-top: 34px; }
-.same h3 { font-size: 21px; font-weight: 900; }
-.same-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 14px; }
-.same figure { margin: 0; }
-.frame { position: relative; line-height: 0; }
-.frame::after { content: ""; position: absolute; top: 0; bottom: 0; left: {{GUIDE}}%; border-left: 2px dashed #ffd24a; }
-.same figcaption, .pair figcaption, .gallery figcaption, .row figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+.pair figcaption, .gallery figcaption, .row figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
 
 /* ツール */
 .tool { padding-block: 34px 38px; border-top: 1px solid var(--rule); scroll-margin-top: 10px; }
@@ -192,7 +181,7 @@ td.num { font-variant-numeric: tabular-nums; }
 .pager button, .scene { font: inherit; font-size: 14px; font-weight: 700; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 3px 12px; cursor: pointer; }
 .pager button:disabled { opacity: .4; cursor: default; }
 .detail h3 { font-size: 16px; font-weight: 900; }
-.pos { position: relative; aspect-ratio: 16 / 9; margin-top: 8px; overflow: hidden; background: #20303f url(assets/vector-camera-view.png) center / cover; }
+.pos { position: relative; aspect-ratio: 16 / 9; margin-top: 8px; overflow: hidden; background: #20303f url(assets/vector-plan-view.png) center / cover; }
 .pos img { position: absolute; max-width: none; transform: translate(-50%, -50%); }
 .detail dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 14px; margin: 10px 0 0; font-size: 14px; }
 .detail dt { color: var(--muted); }
@@ -217,7 +206,6 @@ footer strong { color: var(--ink); }
   .gallery.tall { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 520px) {
-  .same-grid { grid-template-columns: minmax(0, 1fr); }
   .tool-head { grid-template-columns: auto minmax(0, 1fr); }
   .ver { grid-column: 1 / -1; text-align: left; }
   .row img { height: 96px; }
@@ -226,24 +214,21 @@ footer strong { color: var(--ink); }
 
 <div class="wrap hero">
   <div>
-    <p class="kicker">架空の駅の改札案件で試す</p>
+    <p class="kicker">架空の駅のゲートレス改札で試す</p>
     <h1>ArtCraft CLI 実演帳</h1>
-    <p class="lead">ArtCraft 系の 13 個の CLI は、画面を開かずにコマンドだけで動く制作ツールです。ここでは顔認証改札の案件を 1 件想定し、提案資料から完成動画までを CLI だけで作りました。</p>
+    <p class="lead">ArtCraft 系の 13 個の CLI は、画面を開かずにコマンドだけで動く制作ツールです。ここではタッチもゲートもない顔パス改札の案件を 1 件想定し、提案資料から完成動画までを CLI だけで作りました。</p>
     <p class="facts"><span><b>13</b>ツール</span><span><b>{{NCMD}}</b>掲載したコマンド</span><span><b>約 {{TOTAL}} 秒</b>それらの実行時間の合計</span></p>
   </div>
   <div>
-    <div class="ceiling"></div>
-    <div class="rods"><i></i><i></i></div>
     <div class="bezel">
-      <video id="film" controls playsinline preload="metadata" poster="assets/film-frame-ok.png" src="assets/film-tooru-display.mp4" aria-label="ディスプレイの完成動画"></video>
-      <div class="cam"><i></i>CAMERA</div>
+      <video id="hero-film" controls playsinline preload="metadata" poster="assets/film-frame-ok.png" src="assets/film-tooru-screen.mp4" aria-label="案内スクリーンの完成動画"></video>
     </div>
     <p class="jump"><span>場面へ移動</span>
       <button type="button" data-t="{{T_OK}}">認証 OK {{T_OK}} 秒</button>
       <button type="button" data-t="{{T_NG}}">認証 NG {{T_NG}} 秒</button>
       <button type="button" data-t="11">未判定 11 秒</button>
     </p>
-    <p class="direct"><a href="assets/film-tooru-display.mp4">動画ファイルを直接開く</a> / <a href="#history">認証履歴画面へ</a></p>
+    <p class="direct"><a href="assets/film-tooru-screen.mp4">動画ファイルを直接開く</a> / <a href="#history">認証履歴画面へ</a></p>
   </div>
 </div>
 
@@ -261,35 +246,32 @@ footer strong { color: var(--ink); }
 <section class="block" id="brief">
   <div class="wrap">
     <h2>題材の案件</h2>
-    <p class="intro">改札の天井にディスプレイを吊り下げ、そこに付けたカメラの映像を別室のエッジ端末が解析する想定です。駅名、数値、試験データはすべて架空です。顔認証は実行しておらず、人物の位置と判定結果を時系列データとして用意したシミュレーションです。</p>
+    <p class="intro">題材は、ニュースなどで一般に紹介されている「タッチもゲートも不要の顔パス改札」の考え方です。通路の上方のカメラで歩いている人の顔を認証し、結果を音と画面で伝えます。駅名、システム名、数値、データはすべて架空または仮の値で、特定の企業や製品を表すものではありません。顔認証は実行しておらず、人物の位置と判定結果を時系列データとして用意したシミュレーションです。</p>
     <div class="brief">
       <div class="table-scroll"><table>
         <caption hidden>架空の仕様</caption>
         <tbody>
           <tr><th scope="row">舞台</th><td>あさなぎ線 ひかり台駅(架空)</td></tr>
-          <tr><th scope="row">天井高</th><td class="num">3.0 m</td></tr>
-          <tr><th scope="row">ディスプレイ下端</th><td class="num">床から 2.2 m</td></tr>
-          <tr><th scope="row">解像度</th><td class="num">カメラ、ディスプレイともに 1920×1080</td></tr>
-          <tr><th scope="row">顔認証の有効距離</th><td class="num">カメラから 2.0〜4.0 m</td></tr>
+          <tr><th scope="row">通路</th><td class="num">長さ 12 m、幅 6 m、ゲートなし(仮)</td></tr>
+          <tr><th scope="row">認証エリア</th><td class="num">通路入口から 3.0〜7.0 m(仮)</td></tr>
+          <tr><th scope="row">処理能力の目標</th><td class="num">1 分間に 100 人</td></tr>
+          <tr><th scope="row">解像度</th><td class="num">カメラ 3840×2160、画面 1920×1080(仮)</td></tr>
         </tbody>
       </table></div>
       <div class="table-scroll"><table>
         <caption hidden>デモのシナリオ</caption>
-        <thead><tr><th scope="col">人物</th><th scope="col">動き</th><th scope="col">表示</th><th scope="col">効果音</th></tr></thead>
+        <thead><tr><th scope="col">人物</th><th scope="col">動き</th><th scope="col">画面</th><th scope="col">音</th></tr></thead>
         <tbody>
-          <tr><th scope="row">A</th><td>有効距離に入る</td><td>緑の人型 + チェック印</td><td>OK 音</td></tr>
-          <tr><th scope="row">B</th><td>有効距離に入る</td><td>赤の人型 + バツ印</td><td>NG 音</td></tr>
-          <tr><th scope="row">C</th><td>有効距離の外を通過</td><td>灰色の人型</td><td>なし</td></tr>
+          <tr><th scope="row">A</th><td>認証エリアを通る</td><td>緑の人型 + 案内文</td><td>OK 音</td></tr>
+          <tr><th scope="row">B</th><td>認証エリアを通る</td><td>赤の人型 + 案内文</td><td>NG 音</td></tr>
+          <tr><th scope="row">C</th><td>手前を横切る</td><td>灰色の人型</td><td>なし</td></tr>
         </tbody>
       </table></div>
     </div>
-    <div class="same">
-      <h3>カメラと画面で、人型の位置が一致する</h3>
-      <p class="intro">カメラとディスプレイの解像度が同じなので、カメラ映像の座標をそのまま表示に使えます。破線は、人物 A の横位置 x = {{X}} px です。距離は {{D}} m の時点です。通行者と向き合うと左右が逆に見えるため、鏡のように見せたい場合は x 座標を反転します。</p>
-      <div class="same-grid">
-        <figure><div class="frame"><img src="assets/photo-camera-frame.png" alt="カメラ映像風の画像。人物 A が破線の位置にいる" loading="lazy"></div><figcaption>カメラ映像(PhotoCraft で再現)</figcaption></figure>
-        <figure><div class="frame"><img src="assets/film-frame-ok.png" alt="ディスプレイの表示。緑の人型が同じ破線の位置にいる" loading="lazy"></div><figcaption>ディスプレイの表示(FilmCraft の出力)</figcaption></figure>
-      </div>
+    <div class="common">
+      <div><h3>立ち止まらない</h3><p>タッチもゲートもなく、歩いたまま認証します。多くの人が続けて通れます。</p></div>
+      <div><h3>音と画面で伝える</h3><p>結果はスピーカーの音と案内スクリーンの表示で、その場で知らせます。</p></div>
+      <div><h3>誰でも通りやすい</h3><p>ゲートがないので、車椅子の人や大きな荷物を持つ人も通りやすくなります。</p></div>
     </div>
   </div>
 </section>
@@ -305,14 +287,14 @@ footer strong { color: var(--ink); }
         <div class="chart" id="h-chart"><h3>時間帯別の認証件数</h3><svg viewBox="0 0 720 150" role="img" aria-label="時間帯別の認証件数の棒グラフ"></svg><div class="tip" hidden></div></div>
         <div class="filters">
           <label>結果<select id="h-result"><option value="">すべて</option><option value="ok">OK</option><option value="ng">NG</option><option value="none">未判定</option></select></label>
-          <label>改札<select id="h-gate"><option value="">すべて</option><option value="1">1 番</option><option value="2">2 番</option><option value="3">3 番</option></select></label>
+          <label>通路<select id="h-gate"><option value="">すべて</option><option value="1">1 番</option><option value="2">2 番</option><option value="3">3 番</option></select></label>
           <label>キーワード<input id="h-q" type="search" placeholder="E-0240 / G-1A2B"></label>
           <span class="count" id="h-count" aria-live="polite"></span>
         </div>
         <div class="split">
           <div>
             <div class="table-scroll"><table class="history">
-              <thead><tr><th scope="col" aria-sort="descending"><button type="button" class="sort" data-sort="time">時刻</button></th><th scope="col">改札</th><th scope="col">匿名 ID</th><th scope="col"><button type="button" class="sort" data-sort="d">距離</button></th><th scope="col">結果</th></tr></thead>
+              <thead><tr><th scope="col" aria-sort="descending"><button type="button" class="sort" data-sort="time">時刻</button></th><th scope="col">通路</th><th scope="col">匿名 ID</th><th scope="col"><button type="button" class="sort" data-sort="d">位置</button></th><th scope="col">結果</th></tr></thead>
               <tbody id="h-rows"></tbody>
             </table></div>
             <div class="pager"><button type="button" id="h-prev">前へ</button><span id="h-page"></span><button type="button" id="h-next">次へ</button></div>
@@ -362,14 +344,14 @@ footer strong { color: var(--ink); }
 <footer>
   <div class="wrap">
     <p><strong>このページは非公式の紹介ページです。</strong>ArtCraft の開発元が作成、監修したものではありません。</p>
-    <p>駅名、路線名、TOORU、仕様の数値、試験データはすべて架空です。実在の駅、事業者、製品とは関係ありません。文中の他社製品名は各社の商標で、機能の位置づけを説明する目的でのみ記載しています。</p>
+    <p>駅名、路線名、TOORU、仕様の数値、履歴データはすべて架空または仮の値です。実在の駅、事業者、製品とは関係ありません。文中の他社製品名は各社の商標で、機能の位置づけを説明する目的でのみ記載しています。</p>
     <p>参考: <a href="https://getartcraft.com" rel="noopener">getartcraft.com</a> / <a href="https://discord.gg/artcraft" rel="noopener">Discord コミュニティ</a></p>
   </div>
 </footer>
 
 <script>
 (function () {
-  var video = document.getElementById('film');
+  var video = document.getElementById('hero-film');
   document.querySelectorAll('.jump button').forEach(function (b) {
     b.addEventListener('click', function () {
       video.currentTime = parseFloat(b.dataset.t) - 0.6;
@@ -429,8 +411,8 @@ footer strong { color: var(--ink); }
     if (!e) { box.innerHTML = ''; return; }
     var s = e.h / 1000, img = 'assets/photo-person-' + e.result + '.png';
     var left = e.x / 19.2, top = (e.y - 100 * s) / 10.8, height = 1200 * s / 10.8;
-    box.innerHTML = '<h3>' + e.id + ' の詳細</h3><div class="pos"><img src="' + img + '" alt="カメラ座標 x ' + e.x + ' の人型" style="left:' + left + '%;top:' + top + '%;height:' + height + '%"></div>' +
-      '<dl><dt>結果</dt><dd>' + res(e.result) + (e.reason ? '(' + e.reason + ')' : '') + '</dd><dt>時刻</dt><dd>' + e.time + '</dd><dt>改札</dt><dd>' + e.gate + ' 番</dd><dt>匿名 ID</dt><dd>' + e.anon + '</dd><dt>距離</dt><dd>' + e.d.toFixed(2) + ' m</dd><dt>座標</dt><dd>x ' + e.x + ' / y ' + e.y + ' px</dd><dt>応答時間</dt><dd>' + (e.ms ? e.ms + ' ms' : '–') + '</dd></dl>' +
+    box.innerHTML = '<h3>' + e.id + ' の詳細</h3><div class="pos"><img src="' + img + '" alt="通路入口から ' + e.d.toFixed(2) + ' m の位置にある人型" style="left:' + left + '%;top:' + top + '%;height:' + height + '%"></div>' +
+      '<dl><dt>結果</dt><dd>' + res(e.result) + (e.reason ? '(' + e.reason + ')' : '') + '</dd><dt>時刻</dt><dd>' + e.time + '</dd><dt>通路</dt><dd>' + e.gate + ' 番</dd><dt>匿名 ID</dt><dd>' + e.anon + '</dd><dt>位置</dt><dd>入口から ' + e.d.toFixed(2) + ' m</dd><dt>応答時間</dt><dd>' + (e.ms ? e.ms + ' ms' : '–') + '</dd></dl>' +
       (e.scene !== undefined ? '<button type="button" class="scene" data-t="' + e.scene + '">完成動画で人物 ' + e.person + ' の場面を再生</button>' : '');
     var b = box.querySelector('.scene');
     if (b) b.addEventListener('click', function () {

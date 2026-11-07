@@ -4,7 +4,7 @@ import path from 'node:path';
 import { ROOT, BUILD, scenario } from './lib.mjs';
 import { tools, stages, categories, lessons } from './tools.mjs';
 
-const { spec, people } = scenario();
+const { people } = scenario();
 const log = JSON.parse(fs.readFileSync(path.join(BUILD, 'commands.json'), 'utf8'));
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const buildAbs = BUILD.split(path.sep).join('/');
@@ -77,9 +77,6 @@ const stageLegend = Object.values(stages).map((s) => `<li class="stage-${s.color
 const chips = categories.map(([k, n], i) => `<button type="button" class="chip" data-filter="${k}" aria-pressed="${i === 0}">${n}</button>`).join('');
 
 const A = people[0], B = people[1];
-const nearest = (p, t) => p.keys.reduce((b, c) => (Math.abs(c.t - t) < Math.abs(b.t - t) ? c : b));
-const kA = nearest(A, A.tAuth + 0.05);
-const guide = (kA.x / spec.width * 100).toFixed(2);
 const total = log.reduce((s, e) => s + e.ms, 0);
 
 const tpl = fs.readFileSync(path.join(ROOT, 'scripts', 'page.template.html'), 'utf8');
@@ -88,9 +85,7 @@ const page = tpl
   .replace('{{TOOLS}}', tools.map(toolSection).join('\n'))
   .replace('{{LESSONS}}', lessons.map(([a, b, c]) => `<tr><th scope="row">${esc(a)}</th><td>${esc(b)}</td><td>${esc(c)}</td></tr>`).join(''))
   .replace('{{HISTORY}}', fs.readFileSync(path.join(ROOT, 'data', 'history.json'), 'utf8'))
-  .replaceAll('{{GUIDE}}', guide)
   .replaceAll('{{T_OK}}', A.tAuth.toFixed(1)).replaceAll('{{T_NG}}', B.tAuth.toFixed(1))
-  .replaceAll('{{X}}', Math.round(kA.x)).replaceAll('{{D}}', kA.d_m)
   .replaceAll('{{TOTAL}}', (total / 1000).toFixed(0)).replaceAll('{{NCMD}}', log.length);
 
 fs.writeFileSync(path.join(ROOT, 'site', 'index.html'), `<!doctype html>\n<html lang="ja">\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n${page}\n</html>\n`);
